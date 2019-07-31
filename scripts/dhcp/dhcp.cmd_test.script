@@ -1,0 +1,16 @@
+## uboot script example 
+## run as `script ADDR`
+## be sure script terminated by null ))))))
+
+echo HELLO
+echo WORLD
+
+if test "1" = "1"; then
+	echo "IF_OK";
+fi;
+
+if test "1" = "0"; then
+	echo "IF_NOT_OK_ERROR";
+fi;
+
+##END##

@@ -1,0 +1,92 @@
+#!/bin/sh
+
+## hyphop ##
+
+## tftp dhcp server + traffic forward
+
+RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/dhcp.conf
+
+## need a root privs
+for runas in runas sudo; do
+    which $runas 1>/dev/null && break
+done
+
+$runas $(which pkill) -f $PID_FILE
+
+case "$1" in
+    stop|off)
+    exit 0
+    ;;
+esac
+
+IPT_RULE="INPUT -p udp -m multiport --dports 67,69 -i $DEV -j ACCEPT"
+
+iptables="$runas $(which iptables)"
+
+$iptables -D $IPT_RULE >/dev/null 2>/dev/null
+$iptables -I $IPT_RULE
+
+[ "$IP" ] || IP=192.168.100.1
+
+[ "$ROUTER" ] || ROUTER=$IP
+[ "$DNS" ] || DNS=8.8.8.8
+[ "$DNS" ] || DNS=1.1.1.1
+[ "$MASK" ] || MASK=255.255.255.0
+
+TEST=1
+[ "$TEST" = "1" ] && debug=-d
+[ "$1" = "test" ] && debug=-d
+
+[ "$IP0" ] || { 
+IP0="${IP%.*}.100"
+}
+
+[ "$IP1" ] || { 
+IP1="${IP%.*}.200"
+}
+
+ifconfig="$runas $(which ifconfig)"
+
+$ifconfig $DEV $IP netmask $MASK
+$ifconfig $DEV up
+
+dnsmasq="$runas $(which dnsmasq)"
+
+RUNIT(){
+    echo "[i] #! $@">&2
+    "$@"
+}
+
+RUNAS=--user=root
+RUNAS=
+
+
+SHARE="$DP/../share"
+SHARE2="/tmp/krescue.share"
+
+## secure tricks
+for a in $SHARE2; do
+    [ -e $a ] || ln -s "$SHARE" $a
+done
+
+SHARE=$SHARE2
+
+#	--tftp-secure \
+
+#$runas $(which net_forward) start
+$runas $DP/net_forward start
+
+#echo "$IP" > /tmp/dhcp_host.ip
+
+RUNIT $dnsmasq $debug -p0 $RUNAS	\
+	-z -i $DEV			\
+	--enable-tftp=$DEV \
+	--tftp-root="$SHARE" \
+	--tftp-no-fail \
+	-Z \
+	--dhcp-option=1,$MASK		\
+	--dhcp-option=3,$ROUTER		\
+	--dhcp-option=6,$DNS		\
+	--dhcp-range=$IP0,$IP1,240h	\
+	--dhcp-leasefile=$LEASE_FILE	\
+	-x $PID_FILE "$@"

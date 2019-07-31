@@ -1,0 +1,58 @@
+#!/bin/sh
+
+## hyphop ##
+
+# prepare for devs
+
+SHARE=$(dirname $0)/../share
+
+[ -d $SHARE ] || mkdir -p $SHARE
+
+echo "[i] $0 - $SHARE">&2
+
+
+CMD(){
+    echo "[i] $@">&2
+    $@
+}
+LN(){
+    [ -f $1 ] && rm $1
+    CMD ln -sf $2 $1
+}
+
+cd $SHARE
+
+printf "" >	      00_system_env.txt
+LN 80_user_env.txt    ../files/80_user_env.txt
+LN boot.spi.cmd       ../files/boot.spi.cmd 
+LN Image              ../../fenix/linux/arch/arm64/boot/Image 
+LN image.spi.bin      /tmp/krescue.image.bin 
+LN Initrd             ../../khadas-openwrt/initramfs-rescue.xz.squashfs 
+LN linux.dtb          ../../fenix/linux/arch/arm64/boot/dts/amlogic/kvim3_linux.dtb
+LN splash.bmp.gz.make ../files/splash.bmp.gz.make
+LN splash.svg         ../files/splash.svg
+LN u-boot.bin         ../../fenix/u-boot/fip/_tmp/u-boot.bin
+
+LN dhcp.upgrade_spi_flash.cmd_  	../scripts/dhcp/dhcp.upgrade_spi_flash.cmd
+LN dhcp.upgrade_spi_flash.make  	../scripts/dhcp/autoscript.make
+LN dhcp.upgrade_spi_flash.scr     	/tmp/dhcp.upgrade_spi_flash.scr
+
+./dhcp.upgrade_spi_flash.make
+
+echo "[i] done">&2
+
+exit 0
+
+notes="
+-rw-rw-r-- 1 master master   0 Jul 30 07:36 00_system_env.txt
+lrwxrwxrwx 1 master master  24 Jul 30 06:16 80_user_env.txt -> ../files/80_user_env.txt
+lrwxrwxrwx 1 master master  21 Jul 30 06:15 boot.spi.cmd -> ../files/boot.spi.cmd
+lrwxrwxrwx 1 master master  39 Jul 30 05:40 Image -> ../../fenix/linux/arch/arm64/boot/Image
+lrwxrwxrwx 1 master master  22 Jul 30 07:01 image.spi.bin -> /tmp/krescue.image.bin
+lrwxrwxrwx 1 master master  49 Jul 30 05:42 Initrd -> ./../khadas-openwrt/initramfs-rescue.xz.squashfs
+lrwxrwxrwx 1 master master  61 Jul 30 05:38 kvim3_linux.dtb -> ../../fenix/linux/arch/arm64/boot/dts/amlogic/kvim3_linux.dtb
+-rw-rw-r-- 1 master master 320 Jul 30 07:05 README.md
+lrwxrwxrwx 1 master master  27 Jul 30 06:20 splash.bmp.gz.make -> ../files/splash.bmp.gz.make
+lrwxrwxrwx 1 master master  19 Jul 30 06:14 splash.svg -> ../files/splash.svg
+lrwxrwxrwx 1 master master  38 Jul 30 05:37 u-boot.bin -> ../../fenix/u-boot/fip/_tmp/u-boot.bin
+"

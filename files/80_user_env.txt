@@ -1,0 +1,12 @@
+# user env
+
+UIMAGE_ADDR=0x30000000
+UINITRD_ADDR=0x40000000
+
+cmdline=wifi_ssid=VIM3 root=/dev/ram0 rw init=/init panic=10 net.ifnames=0 \
+loglevel=3
+
+#console=tty0 console=ttyS0,115200n8 no_console_suspend consoleblank=0
+#vout=${outputmode},enable hdmitx=${cecconfig},${colorattribute} hdmimode=${hdmimode} cvbsmode=${cvbsmode} osd_reverse=${osd_reverse} video_reverse=${video_reverse} jtag=${jtag} reboot_mode=${reboot_mode} ddr_size=${ddr_size}
+
+

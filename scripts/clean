@@ -1,0 +1,23 @@
+#!/bin/sh
+
+## hyphop ##
+
+P=$(dirname $0)
+
+UNI=/tmp/krescue
+
+S="$P/../share"
+
+P=$PWD
+
+cd $S
+
+printf "" > 00_system_env.txt
+
+for f in *.PAD uI* *.gz; do
+    [ -f $f ] && {
+	rm $f
+    }
+done
+
+

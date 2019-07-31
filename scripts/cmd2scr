@@ -1,0 +1,5 @@
+#!/bin/sh
+
+## hyphop ##
+
+mkimage -C none -A arm -T script -d $1 $2

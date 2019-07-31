@@ -1,0 +1,72 @@
+#!/bin/sh
+
+## hyphop ##
+
+# simple ip forward traffic manager linux example
+
+BIN=$0
+PROG=`basename $0`
+
+permup(){
+
+# need root perms
+# or
+# sudo ./sys_drop_cache
+
+[ "$USER" != "root" ] && {
+    echo "[i] sudo $BIN $@" >&2
+    sudo "$BIN" "$@"
+    exit 0
+}
+
+}
+
+usage(){
+    echo "$PROG - ip forward traffic manager
+    usage: $PROG [ stop | start | status | help ]
+    "
+}
+
+forward_start() {
+    permup start
+    [ "$1" ] || echo "[i] net_forward start" >&2
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -I POSTROUTING -j MASQUERADE
+}
+
+forward_stop() {
+    permup stop
+    [ "$1" ] || echo "[i] net_forward stop" >&2
+    echo 0 > /proc/sys/net/ipv4/ip_forward
+    iptables -t nat -D POSTROUTING -j MASQUERADE
+}
+
+
+forward_on=
+
+forward_check() {
+    forward_on=`cat /proc/sys/net/ipv4/ip_forward`
+    [ "$1" ] || echo "[i] net_forward is: $forward_on" >&2
+    return $forward_on
+#    iptables -t nat -D POSTROUTING -j MASQUERADE
+}
+
+
+case "$1" in
+    stop)
+    forward_stop
+    ;;
+    start)
+    forward_start
+    ;;
+    status)
+    forward_check
+    ;;
+    help)
+    usage
+    ;;
+    *)
+    usage
+    forward_check
+esac
+

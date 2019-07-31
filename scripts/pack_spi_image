@@ -1,0 +1,463 @@
+#!/bin/sh
+
+## hyphop ##
+
+## openwrt spi image builder ...
+##
+##
+##
+
+P=$(dirname $0)
+
+FLASH_SIZE=$((1024*1024*16))
+
+ENV_OFFSET=$((FLASH_SIZE-64*1024))
+ENV_OFFSET_HEX=$(printf %06X $ENV_OFFSET)
+
+UNI=/tmp/krescue
+
+S="$P/../share"
+
+NOCACHE=
+
+OUT=$UNI.image.bin
+OUT_SPI="$S/image.spi.bin"
+
+# kernel run from there
+LINUX_ADDR=0x01080000
+KERNEL_CMP=lzma
+
+BLOCK_SIZE=$((1024*64))
+BLOCK_SIZH=$((1024*32))
+
+SYS_ENV=$S/00_system_env.txt
+
+UBOOT_BIN=$S/u-boot*
+UBOOT_SCRIPT=$S/*.cmd
+UBOOT_SCRIPT_ENV=$S/*env.txt
+UBOOT_LOGOS=$S/*.bmp.gz
+UBOOT_DTB=$S/*.dtb
+LINUX_U_IMAGE=$S/uImage
+LINUX_U_INITRD=$S/uInitrd
+LINUX_IMAGE=$S/Image
+LINUX_INITRD=$S/Initrd
+UBOOT_ENV=$S/ENV.txt
+
+CMD2(){
+    [ -s "$1" ] && {
+	echo "[i] run cmd $@">&2
+	"$@"
+    }
+}
+
+CMD(){
+	echo "[i] run cmd $@">&2
+	"$@"
+}
+
+
+# data location
+#
+# UBOOT | SCRIPT | SCRIPT_ENV | LOGOS | DTB | U_IMAGE | U_INITRD | ENV
+#
+#
+
+echo "[i] mask
+$UBOOT_BIN
+$UBOOT_SCRIPT
+$UBOOT_SCRIPT_ENV
+$UBOOT_LOGOS
+$UBOOT_DTB
+$LINUX_U_IMAGE
+$LINUX_U_INITRD
+$LINUX_IMAGE
+$LINUX_INITRD
+$UBOOT_ENV
+"
+
+filesize(){
+    stat -L -c%s "$1"
+}
+
+## find UBOOT sd
+
+UBOOT_BIN_SIZE=
+
+for UBOOT_BIN in $UBOOT_BIN ""; do
+#    [ -L "$UBOOT_BIN" ] && {
+#	UBOOT_BIN=$(realpath $UBOOT_BIN)
+#    }
+    [ -f "$UBOOT_BIN" ] && {
+	break
+    }
+done
+
+[ "$UBOOT_BIN" ] || {
+    echo "[e] undefined UBOOT_BIN">&2
+    exit 1
+}
+
+UBOOT_BIN_SIZE=$(filesize $UBOOT_BIN)
+
+
+[ $UBOOT_BIN_SIZE -lt 1000000 ] && {
+    echo "[e] wrong file $UBOOT_BIN">&2
+    exit 1
+}
+
+
+## prepare SCRIPT
+
+UBOOT_SCRIPT_TMP=$UNI.script.tmp
+UBOOT_SCRIPT_SCR=$UNI.script.scr
+UBOOT_SCRIPTS=
+
+echo "" > $UBOOT_SCRIPT_TMP
+
+for u in $UBOOT_SCRIPT; do
+    [ -f $u ] && {
+	echo "# generated from $u $(date)" >> $UBOOT_SCRIPT_TMP
+	cat $u >> $UBOOT_SCRIPT_TMP
+	UBOOT_SCRIPTS=$((UBOOT_SCRIPTS+1))
+    }
+done
+
+CMD mkimage -C none -A arm -T script -d $UBOOT_SCRIPT_TMP $UBOOT_SCRIPT_SCR
+
+UBOOT_SCRIPT_SIZE=$(filesize $UBOOT_SCRIPT_SCR)
+
+[ $UBOOT_SCRIPTS -lt 1 ] && {
+    echo "[e] not found script in $UBOOT_SCRIPT">&2
+    exit 1
+}
+
+## LOGOS
+
+UBOOT_LOGO=
+
+for UBOOT_LOGO in $UBOOT_LOGOS "" ; do
+
+    [ -f $UBOOT_LOGO ] && {
+	break
+    }
+
+    CMD2 $UBOOT_LOGO.make || {
+	echo "[e] $UBOOT_LOGO.make error">&2
+	exit 1
+    }
+
+    [ -f $UBOOT_LOGO ] && {
+	break
+    }
+
+done
+
+UBOOT_LOGO_SIZE=$(filesize $UBOOT_LOGO)
+
+[ "$UBOOT_LOGO_SIZE" ] || {
+    echo "[i] zero size $UBOOT_LOGOS">&2
+    exit 1
+}
+
+## DTB
+
+for UBOOT_DTB in $UBOOT_DTB "" ; do
+    [ -f "$UBOOT_DTB" ] && {
+	break
+    }
+done
+
+[ "$UBOOT_DTB" ] || {
+    echo "[e] undefined UBOOT_DTB">&2
+    exit 1
+}
+
+UBOOT_DTB_SIZE=$(filesize $UBOOT_DTB)
+
+[ "$UBOOT_DTB_SIZE" ] || {
+    echo "[e] wrong file $UBOOT_DTB">&2
+    exit 1
+}
+
+## Image linux kernel
+
+for LINUX_IMAGE in $LINUX_IMAGE "" ; do
+    [ -f "$LINUX_IMAGE" ] && {
+	break
+    }
+done
+
+[ "$LINUX_IMAGE" ] || {
+    echo "[e] undefined LINUX_IMAGE">&2
+    exit 1
+}
+
+LINUX_IMAGE_SIZE=$(filesize $LINUX_IMAGE)
+
+[ "$LINUX_IMAGE_SIZE" -lt 1000000 ] && {
+    echo "[e] wrong file $LINUX_IMAGE">&2
+    exit 1
+}
+
+
+CKERNEL=$UNI.Image.$KERNEL_CMP
+
+[ $NOCACHE ] && rm $CKERNEL
+
+KNAME=$(basename $CKERNEL)
+
+[ -f $CKERNEL ] || {
+    echo "[i] compress kernel $LINUX_IMAGE">&2
+    CMD lzma -c $LINUX_IMAGE > $CKERNEL
+}
+
+CMD mkimage -A arm64 -O linux -C $KERNEL_CMP \
+	-T kernel -a $LINUX_ADDR -e $LINUX_ADDR \
+	-n "$KNAME" -d $CKERNEL $LINUX_U_IMAGE || {
+
+    echo "[e] error mkimage ">&2
+    exit 1
+
+}
+
+LINUX_U_IMAGE_SIZE=$(filesize $LINUX_U_IMAGE)
+
+[ "$LINUX_U_IMAGE_SIZE" -lt 1000000 ] && {
+    echo "[e] wrong LINUX_U_IMAGE_SIZE">&2
+    exit 1
+}
+
+LINUX_INITRD_SIZE=$(filesize $LINUX_INITRD)
+
+[ "$LINUX_INITRD_SIZE" -lt 1000000 ] && {
+    echo "[e] wrong LINUX_INITRD_SIZE for $LINUX_INITRD">&2
+    exit 1
+}
+
+CMD mkimage -A arm64 \
+    -O linux \
+    -T ramdisk \
+    -C none \
+    -a 0x00000000 \
+    -e 0x00000000 \
+    -n uInitrd \
+    -d $LINUX_INITRD $LINUX_U_INITRD
+
+LINUX_U_INITRD_SIZE=$(filesize $LINUX_U_INITRD)
+
+[ "$LINUX_U_INITRD_SIZE" -lt 1000000 ] && {
+    echo "[e] wrong LINUX_U_INITRD_SIZE for $LINUX_U_INITRD">&2
+    exit 1
+}
+
+PAD(){
+    a=$1
+    [ "$a" ] || a=0
+    b=$2
+    [ "$b" ] || b=$BLOCK_SIZE
+    s=$(( ($a/$b) * $b ))
+    [ "$a" -gt $s ] && { 
+	s=$((s+$b))
+    }
+    [ "$3" ] && {
+	s=$((s+$3))
+    }
+
+    echo $s
+}
+
+HEX(){
+    printf "0x%06X" "$1"
+}
+
+FLINE(){
+    n="$1"
+    shift
+    f="$1"
+    shift
+    printf "|%08s|%08s|%08s|%08s|%08s|%04s|%-30s|\n" "$n" "$@" $(($2/$BLOCK_SIZH)) "$f"
+
+echo "#$n
+${n}_SIZE=$1
+${n}_SIZHEX=$(HEX $2)
+${n}_SPAD=$2
+${n}_OFFSET=$3
+${n}_OFFHEX=$4
+" >> $SYS_ENV
+
+    [ -f "$f" ] || {
+	return
+    }
+
+    dd if=/dev/zero bs=$BLOCK_SIZH \
+	count=$(($2/$BLOCK_SIZH)) \
+	of="$S/$n.PAD" 1>/dev/null 2>/dev/null
+    dd if=$f bs=$BLOCK_SIZH \
+	count=$(($2/$BLOCK_SIZH)) \
+	conv=notrunc of="$S/$n.PAD" 1>/dev/null 2>/dev/null
+
+}
+
+o=0
+
+## FIXED
+UBOOT_SCRIPT_ENV_SIZE=$BLOCK_SIZH
+
+## 
+UBOOT_SIZE=$UBOOT_BIN_SIZE
+SCRIPT_SIZE=$UBOOT_SCRIPT_SIZE
+ENV_SIZE=$UBOOT_SCRIPT_ENV_SIZE
+LOGO_SIZE=$UBOOT_LOGO_SIZE
+DTB_SIZE=$UBOOT_DTB_SIZE
+UIMAGE_SIZE=$LINUX_U_IMAGE_SIZE
+UINITRD_SIZE=$LINUX_U_INITRD_SIZE
+
+
+echo "# SYSTEM_ENV auto generated $(date)
+" > $SYS_ENV
+
+## fix size
+
+UBOOT_BIN_SIZE=$((20*$BLOCK_SIZE)) ## 0x140000 size
+
+# uboot
+#s=$(PAD $UBOOT_BIN_SIZE $BLOCK_SIZE $BLOCK_SIZE)
+s=$(PAD $UBOOT_BIN_SIZE)
+UBOOT_BIN_SIZE_PAD=$s
+o=$((o+$s))
+
+FLINE "UBOOT" $UBOOT_BIN \
+    $UBOOT_BIN_SIZE $UBOOT_BIN_SIZE_PAD 0 0
+
+## dtb
+UBOOT_DTB_OFFSET=$o
+UBOOT_DTB_OFFSET_HEX=$(HEX $o)
+
+## fix size
+UBOOT_DTB_SIZE=$((2*$BLOCK_SIZE)) ## 0x140000 offset 
+
+s=$(PAD $UBOOT_DTB_SIZE)
+UBOOT_DTB_SIZE_PAD=$s
+o=$((o+$s))
+
+FLINE "DTB" $UBOOT_DTB $UBOOT_DTB_SIZE $UBOOT_DTB_SIZE_PAD \
+    $UBOOT_DTB_OFFSET $UBOOT_DTB_OFFSET_HEX
+
+# script
+UBOOT_SCRIPT_SCR_OFFSET=$o
+UBOOT_SCRIPT_SCR_OFFSET_HEX=$(HEX $o)
+
+s=$(PAD $UBOOT_SCRIPT_SIZE $BLOCK_SIZH)
+UBOOT_SCRIPT_SIZE_PAD=$s
+o=$((o+$s))
+
+FLINE "SCRIPT" $UBOOT_SCRIPT_SCR \
+    $UBOOT_SCRIPT_SIZE $UBOOT_SCRIPT_SIZE_PAD \
+    $UBOOT_SCRIPT_SCR_OFFSET $UBOOT_SCRIPT_SCR_OFFSET_HEX
+
+## fixed env
+UBOOT_SCRIPT_ENV_OFFSET=$o
+UBOOT_SCRIPT_ENV_OFFSET_HEX=$(HEX $o)
+
+s=$(PAD $UBOOT_SCRIPT_ENV_SIZE $BLOCK_SIZH)
+o=$((o+$s))
+UBOOT_SCRIPT_ENV_SIZE_PAD=$s
+
+UBOOT_SCRIPT_ENV_TMP=$UNI.uboot.env
+
+echo "" > $UBOOT_SCRIPT_ENV_TMP
+
+FLINE "UENV" "$UBOOT_SCRIPT_ENV_TMP" \
+    $UBOOT_SCRIPT_ENV_SIZE $UBOOT_SCRIPT_ENV_SIZE_PAD \
+    $UBOOT_SCRIPT_ENV_OFFSET $UBOOT_SCRIPT_ENV_OFFSET_HEX
+
+## logo
+UBOOT_LOGO_OFFSET=$o
+UBOOT_LOGO_OFFSET_HEX=$(HEX $o)
+
+s=$(PAD $UBOOT_LOGO_SIZE)
+UBOOT_LOGO_SIZE_PAD=$s
+o=$((o+$s))
+
+FLINE "LOGO" $UBOOT_LOGO $UBOOT_LOGO_SIZE $UBOOT_LOGO_SIZE_PAD \
+    $UBOOT_LOGO_OFFSET $UBOOT_LOGO_OFFSET_HEX
+
+
+## uimage
+UIMAGE_OFFSET=$o
+UIMAGE_OFFSET_HEX=$(HEX $o)
+
+s=$(PAD $UIMAGE_SIZE $BLOCK_SIZE $BLOCK_SIZE)
+UIMAGE_SIZE_PAD=$s
+o=$((o+$s))
+
+#FLINE "IMAGE"	$LINUX_IMAGE			$LINUX_IMAGE_SIZE	- - -
+FLINE "UIMAGE" $LINUX_U_IMAGE $LINUX_U_IMAGE_SIZE $UIMAGE_SIZE_PAD \
+    $UIMAGE_OFFSET $UIMAGE_OFFSET_HEX
+
+
+## uinitrd
+UINITRD_OFFSET=$o
+UINITRD_OFFSET_HEX=$(HEX $o)
+
+s=$(PAD $UINITRD_SIZE)
+UINITRD_SIZE_PAD=$((s))
+o=$((o+$s))
+
+## 
+ENV_OFFSET_HEX=$(HEX $ENV_OFFSET)
+
+#FLINE "INITRD"	$LINUX_INITRD			$LINUX_INITRD_SIZE	- - - 
+FLINE "UINITRD"	$LINUX_U_INITRD $LINUX_U_INITRD_SIZE $UINITRD_SIZE_PAD \
+    $UINITRD_OFFSET $UINITRD_OFFSET_HEX
+FLINE "ENV" - $BLOCK_SIZE $BLOCK_SIZE \
+    $ENV_OFFSET $ENV_OFFSET_HEX
+
+user_data_size=$((ENV_OFFSET-$o))
+
+echo "total bytes: $o free user_data ($user_data_size)">&2
+
+[ "$o" -gt "$ENV_OFFSET" ] && {
+    echo "[i] oversize !!! $o > $ENV_OFFSET">&2
+    exit 1 
+}
+
+UBOOT_SCRIPT_ENV_TMP=$UNI.script.env.tmp
+
+echo "[i] rebuild script env $UBOOT_SCRIPT_ENV">&2
+printf "" > $UBOOT_SCRIPT_ENV_TMP
+for u in $UBOOT_SCRIPT_ENV; do
+    [ -f $u ] && {
+	echo "[i] add $u">&2
+	cat $u >> $UBOOT_SCRIPT_ENV_TMP
+    }
+done
+
+CMD dd if=$UBOOT_SCRIPT_ENV_TMP \
+    bs=$BLOCK_SIZH \
+    conv=notrunc \
+    of="$S/UENV.PAD" 1>/dev/null 2>/dev/null
+
+[ -s $OUT ] && rm $OUT
+
+for s in \
+UBOOT.PAD \
+DTB.PAD \
+SCRIPT.PAD \
+UENV.PAD \
+LOGO.PAD \
+UIMAGE.PAD \
+UINITRD.PAD; do
+
+    echo "[i] concat $s">&2
+    cat $S/$s >> $OUT
+
+done
+
+ln -sf $OUT $OUT_SPI
+
+echo "[i] image $OUT_SPI -> $OUT - is ready">&2
+
+
+
+
