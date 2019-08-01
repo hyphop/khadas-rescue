@@ -63,3 +63,7 @@ https://github.com/hyphop/khadas-rescue
 + https://github.com/hyphop/khadas-openwrt
 + https://github.com/hyphop/uboot-extra
 
+## links
+
++ https://docs.khadas.com
++ https://github.com/khadas
