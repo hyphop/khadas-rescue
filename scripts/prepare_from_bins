@@ -57,6 +57,11 @@ DL "$DOWNLOAD_BASE/$U_BOOT_SRC" "$T"
 
 [ -f "${T%.*}" ] || gzip -dc "$T" > "${T%.*}"
 
+T="$(basename $U_BOOT_SD_SRC)"
+DL "$DOWNLOAD_BASE/$U_BOOT_SD_SRC" "$T"
+
+[ -f "${T%.*}" ] || gzip -dc "$T" > "${T%.*}"
+
 T="$(basename $DTB_SRC)"
 DL "$DOWNLOAD_BASE/$DTB_SRC" "$T"
 
