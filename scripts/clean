@@ -20,4 +20,6 @@ for f in *.PAD uI* *.gz; do
     }
 done
 
-
+[ "$1" = "all" ] && {
+    rm $S/*
+}

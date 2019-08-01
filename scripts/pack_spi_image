@@ -76,7 +76,10 @@ $UBOOT_ENV
 "
 
 filesize(){
-    stat -L -c%s "$1"
+    stat -L -c%s "$1" || {
+	echo "[e] file not found $1">&2
+	exit 1
+    }
 }
 
 ## find UBOOT sd
@@ -97,8 +100,7 @@ done
     exit 1
 }
 
-UBOOT_BIN_SIZE=$(filesize $UBOOT_BIN)
-
+UBOOT_BIN_SIZE=$(filesize $UBOOT_BIN) || exit 1
 
 [ $UBOOT_BIN_SIZE -lt 1000000 ] && {
     echo "[e] wrong file $UBOOT_BIN">&2
@@ -124,7 +126,7 @@ done
 
 CMD mkimage -C none -A arm -T script -d $UBOOT_SCRIPT_TMP $UBOOT_SCRIPT_SCR
 
-UBOOT_SCRIPT_SIZE=$(filesize $UBOOT_SCRIPT_SCR)
+UBOOT_SCRIPT_SIZE=$(filesize $UBOOT_SCRIPT_SCR) || exit 1
 
 [ $UBOOT_SCRIPTS -lt 1 ] && {
     echo "[e] not found script in $UBOOT_SCRIPT">&2
@@ -152,7 +154,7 @@ for UBOOT_LOGO in $UBOOT_LOGOS "" ; do
 
 done
 
-UBOOT_LOGO_SIZE=$(filesize $UBOOT_LOGO)
+UBOOT_LOGO_SIZE=$(filesize $UBOOT_LOGO) || exit 1
 
 [ "$UBOOT_LOGO_SIZE" ] || {
     echo "[i] zero size $UBOOT_LOGOS">&2
@@ -172,7 +174,7 @@ done
     exit 1
 }
 
-UBOOT_DTB_SIZE=$(filesize $UBOOT_DTB)
+UBOOT_DTB_SIZE=$(filesize $UBOOT_DTB) || exit 1
 
 [ "$UBOOT_DTB_SIZE" ] || {
     echo "[e] wrong file $UBOOT_DTB">&2
@@ -192,7 +194,7 @@ done
     exit 1
 }
 
-LINUX_IMAGE_SIZE=$(filesize $LINUX_IMAGE)
+LINUX_IMAGE_SIZE=$(filesize $LINUX_IMAGE) || exit 1
 
 [ "$LINUX_IMAGE_SIZE" -lt 1000000 ] && {
     echo "[e] wrong file $LINUX_IMAGE">&2
@@ -220,14 +222,14 @@ CMD mkimage -A arm64 -O linux -C $KERNEL_CMP \
 
 }
 
-LINUX_U_IMAGE_SIZE=$(filesize $LINUX_U_IMAGE)
+LINUX_U_IMAGE_SIZE=$(filesize $LINUX_U_IMAGE) || exit 1
 
 [ "$LINUX_U_IMAGE_SIZE" -lt 1000000 ] && {
     echo "[e] wrong LINUX_U_IMAGE_SIZE">&2
     exit 1
 }
 
-LINUX_INITRD_SIZE=$(filesize $LINUX_INITRD)
+LINUX_INITRD_SIZE=$(filesize $LINUX_INITRD) || exit 1
 
 [ "$LINUX_INITRD_SIZE" -lt 1000000 ] && {
     echo "[e] wrong LINUX_INITRD_SIZE for $LINUX_INITRD">&2

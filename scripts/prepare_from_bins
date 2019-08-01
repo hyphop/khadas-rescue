@@ -2,3 +2,76 @@
 
 ## hyphop ##
 
+## prepare from bins
+
+RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/downloads.conf
+
+TO=../share
+
+CMD(){
+    echo "[#] $@"
+    "$@"
+}
+
+LN(){
+    [ -f $1 ] && rm $1
+    CMD ln -sf $2 $1
+}
+
+
+A="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101"
+
+DL(){
+
+    [ -s "$2" ] && {
+#    add1="$add -c"
+#    add2="$add -C-"
+	true
+    }
+
+#   CMD curl -kL $add2 -o "$2" "$1"
+
+    [ -s "$2" ] && {
+	echo "[w] looks like downloaded already $2">&2
+	return
+    }
+
+    CMD wget $add1 -O "$2" "$1"
+
+}
+
+cd $DP/$TO ||  {
+    echo "[e] change dir">&2
+    exit 1
+}
+
+echo "[i] preprate plz wait">&2
+echo "[i] download to $RP/$TO">&2
+
+T="$(basename $KERNEL_SRC)"
+DL "$DOWNLOAD_BASE/$KERNEL_SRC" "$T"
+[ -f "${T%.*}" ] || lzma -dc "$T" > "${T%.*}"
+
+T="$(basename $U_BOOT_SRC)"
+DL "$DOWNLOAD_BASE/$U_BOOT_SRC" "$T"
+
+[ -f "${T%.*}" ] || gzip -dc "$T" > "${T%.*}"
+
+T="$(basename $DTB_SRC)"
+DL "$DOWNLOAD_BASE/$DTB_SRC" "$T"
+
+T="$(basename $INITRD_SRC)"
+DL "$DOWNLOAD_BASE/$INITRD_SRC" "$T"
+
+LN Initrd         	$T
+
+printf "" >	      00_system_env.txt
+
+LN 80_user_env.txt    ../files/80_user_env.txt
+LN boot.spi.cmd       ../files/boot.spi.cmd 
+LN image.spi.bin      /tmp/krescue.image.bin 
+LN splash.bmp.gz.make ../files/splash.bmp.gz.make
+LN splash.svg         ../files/splash.svg
+
+
+
