@@ -4,11 +4,14 @@
 
 experemintal!!!, tested on for VIM3 v1.2
 
+https://github.com/hyphop/khadas-rescue
+
 ## features
 
 + fully located in spi flash
 + all in ram
-+ very fast
++ very fast just a 10 sec full boot time
++ flash disks frendly
 + extreme small
 + openwrt based
 + open source
@@ -19,10 +22,13 @@ experemintal!!!, tested on for VIM3 v1.2
 + rescue mode for repare install reinstall etc...
 + fully customizations
 + fully automations
++ advaced smart boot sequnces
++ hot keys
 
 ## what can i get from this 
 
 + we have always bootable system in anycase
++ its unkillable rescue system 
 + we no need to use special software for updates upgrades rescue system etc.
 + we can install and setup any os to any strorages
 + muli bootable os
@@ -44,4 +50,16 @@ experemintal!!!, tested on for VIM3 v1.2
     ../scripts/prepare_dev
     # make image
     ../scripts/pack_spi_image
+
+## to do
+
++ docs / mans !!!
++ its just begin, and we need to do to much )))
+
+## related projects
+
++ https://github.com/hyphop/khadas-linux-kernel
++ https://github.com/hyphop/khadas-uboot-spi
++ https://github.com/hyphop/khadas-openwrt
++ https://github.com/hyphop/uboot-extra
 
