@@ -22,7 +22,7 @@ https://github.com/hyphop/khadas-rescue
 + rescue mode for repare install reinstall etc...
 + fully customizations
 + fully automations
-+ advaced smart boot sequnces
++ advanced smart boot sequences
 + hot keys
 
 ## what can i get from this 
@@ -30,7 +30,7 @@ https://github.com/hyphop/khadas-rescue
 + we have always bootable system in anycase
 + its unkillable rescue system 
 + we no need to use special software for updates upgrades rescue system etc.
-+ we can install and setup any os to any strorages
++ we can install and setup any os to any storages
 + muli bootable os
 + andvanced rescue system with resize move fsck and many other tools 
 + we have access to device via usb_net, wifi_ap, wifi_sta, eth_dhcp, usb_storage, ssh, http ...
