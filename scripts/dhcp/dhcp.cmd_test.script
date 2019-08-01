@@ -1,16 +1,54 @@
-## uboot script example 
-## run as `script ADDR`
-## be sure script terminated by null ))))))
+#!script
 
-echo HELLO
+echo FIST_32_BYTE_TEST 1 2 3 4 5 6 7 8 9 0
+
+## uboot script cmd usage example
+
+## script must begin from #!script
+##
+## run as `script $ADDR $length`
+## if length not defined script must terminated by null 
+## or have ##END## mark at the end of script ))))))
+##
+## https://github.com/hyphop/uboot-extra
+## 
+
 echo WORLD
+
+echo THIS IS MULTI \
+    LINE \
+    TEST
+
+if test "1" = "0"; then
+	echo "IF_YOU_SEE_IT_THIS_ERROR 1"
+fi
 
 if test "1" = "1"; then
 	echo "IF_OK";
-fi;
+fi
 
-if test "1" = "0"; then
-	echo "IF_NOT_OK_ERROR";
-fi;
+if test "1" = "0"
+then
+	echo "IF_YOU_SEE_IT_THIS_ERROR 2"
+fi
+
+if test "1" = "1"; then
+    echo OK_BUT_ONLY \
+	THERE
+fi
+
+#test 1 = 1 && \
+#    echo ITS_NOT_WORK
+
+test 1 = 1 \
+    && echo ITS_WORK_FINE
+
+test 1 = 1 && echo ONLY_THIS && echo OR_THIS
 
 ##END##
+
+next strings after ##END## always ignored
+
+echo NOT_PRINTED
+
+((( )))) [[[ ]]] ;;;;

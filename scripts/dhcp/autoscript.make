@@ -2,17 +2,21 @@
 
 ## hyphop ##
 
+## script mkimage auto packer
+
 B="$(dirname $0)"
 
-PACK="mkimage -C none -A arm -T script -d"
+PACK="mkimage -C none -A arm -n AUTOSCRIPT -T script -d"
 
 CMD(){
     echo "$@"
     $@
 }
 
-IN=${0%.*}.cmd_
-OUT=${0%.*}.scr
+[ "$IN" ] || IN="$1"
+[ "$IN" ] || IN=${0%.*}.cmd_
+[ "$OUT" ] || OUT="$2"
+[ "$OUT" ] || OUT=${IN%.*}.scr
 
 echo "[i] $IN > $OUT">&2
 

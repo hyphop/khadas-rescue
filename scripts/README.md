@@ -1,6 +1,6 @@
 # scripts
 
-+ pack_spi_image	- packer
++ pack_spi_image	- spi-flash image packer
 + clean			- clean all work files
 + prepare		- share prapare from bins
 + prepare_from_bins	- ...
