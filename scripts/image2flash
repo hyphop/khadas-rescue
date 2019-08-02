@@ -1,0 +1,34 @@
+#!/bin/sh
+
+## hyphop ##
+
+[ "$DEV" ] || DEV="$2"
+[ "$DEV" ] || DEV=/dev/mmcblk0
+
+[ "$IN" ] || IN="$1"
+
+sudo=sudo
+
+echo "[i] wite u-boot to sd or mmc">&2
+
+[ -b $DEV ] || {
+    echo "[e] not block dev $DEV">&2
+    exit 1
+}
+
+CMD(){
+    echo "[i] $@">&2
+    "$@"
+}
+
+cat /sys/class/block/${DEV#/dev/}/device/model
+
+CMD $sudo dd if=$IN of=$DEV conv=notrunc bs=8192
+
+sync
+
+
+
+
+
+

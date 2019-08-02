@@ -32,7 +32,7 @@ BLOCK_SIZH=$((1024*32))
 
 SYS_ENV=$S/00_system_env.txt
 
-UBOOT_BIN=$S/u-boot*
+UBOOT_BIN=$S/u-boot.spi.bin
 UBOOT_SCRIPT=$S/*.cmd
 UBOOT_SCRIPT_ENV=$S/*env.txt
 UBOOT_LOGOS=$S/*.bmp.gz
@@ -114,7 +114,7 @@ UBOOT_SCRIPT_TMP=$UNI.script.tmp
 UBOOT_SCRIPT_SCR=$UNI.script.scr
 UBOOT_SCRIPTS=
 
-echo "" > $UBOOT_SCRIPT_TMP
+echo "#!script" > $UBOOT_SCRIPT_TMP
 
 for u in $UBOOT_SCRIPT; do
     [ -f $u ] && {
@@ -124,7 +124,9 @@ for u in $UBOOT_SCRIPT; do
     }
 done
 
-CMD mkimage -C none -A arm -T script -d $UBOOT_SCRIPT_TMP $UBOOT_SCRIPT_SCR
+#CMD mkimage -C none -A arm -T script -d $UBOOT_SCRIPT_TMP $UBOOT_SCRIPT_SCR
+
+ln -sf $UBOOT_SCRIPT_TMP $UBOOT_SCRIPT_SCR
 
 UBOOT_SCRIPT_SIZE=$(filesize $UBOOT_SCRIPT_SCR) || exit 1
 

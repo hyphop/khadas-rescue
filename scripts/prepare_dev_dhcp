@@ -1,0 +1,33 @@
+#!/bin/sh
+
+## hyphop ##
+
+# prepare for devs
+
+SHARE=$(dirname $0)/../share
+
+[ -d $SHARE ] || mkdir -p $SHARE
+
+echo "[i] $0 - $SHARE">&2
+
+
+CMD(){
+    echo "[i] $@">&2
+    $@
+}
+LN(){
+    [ -f $1 ] && rm $1
+    CMD ln -sf $2 $1
+}
+
+cd $SHARE
+
+LN dhcp.upgrade_spi_flash.cmd_  	../scripts/dhcp/dhcp.upgrade_spi_flash.cmd
+LN dhcp.upgrade_spi_flash.make  	../scripts/dhcp/autoscript.make
+LN dhcp.upgrade_spi_flash.scr     	/tmp/dhcp.upgrade_spi_flash.scr
+
+
+./dhcp.upgrade_spi_flash.make
+
+echo "[i] done">&2
+

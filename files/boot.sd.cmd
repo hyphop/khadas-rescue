@@ -1,41 +1,26 @@
 #!script
-## uboot script
 
 ## hyphop ##
 
-## PREPARE
+echo "**RESCUE LOAD FROM SD**"
 
-### fixed
-ENV_SIZHEX=0x008000
 ENV_OFFHEX=0x168000
-
-SPI_HZ=104000000
-
-echo "[i] sf probe $SPI_HZ"
-sf probe 0 $SPI_HZ
-
-#already readed
-#echo "[i] load dtb"
-#sf read ${addr_dtb} $DTB_OFFHEX $DTB_SIZHEX
+LOGO_OFFHEX=0x168000
 
 echo "load env"
-echo sf read $ENV_OFFHEX $ENV_OFFHEX $ENV_SIZHEX
-sf read $ENV_OFFHEX $ENV_OFFHEX $ENV_SIZHEX
-echo env import -t $ENV_OFFHEX $ENV_SIZHEX
-env import -t $ENV_OFFHEX $ENV_SIZHEX
+fatload mmc 0 $ENV_OFFHEX /rescue/80_user_env.txt
+echo env import -t $ENV_OFFHEX $filesize
+env import -t $ENV_OFFHEX $filesize
 
 echo "load logo"
-echo sf read $LOGO_OFFHEX $LOGO_OFFHEX $LOGO_SIZHEX
-sf read $LOGO_OFFHEX $LOGO_OFFHEX $LOGO_SIZHEX
+fatload mmc 0 $LOGO_OFFHEX /rescue/splash.bmp.gz
 bmp display $LOGO_OFFHEX 0 0
 
 echo "load kernel"
-echo sf read $UIMAGE_ADDR $UIMAGE_OFFHEX $UIMAGE_SIZHEX
-sf read $UIMAGE_ADDR $UIMAGE_OFFHEX $UIMAGE_SIZHEX
+fatload mmc 0 $UIMAGE_ADDR /rescue/uImage
 
 echo "load initrd"
-echo sf read $UINITRD_ADDR $UINITRD_OFFHEX $UINITRD_SIZHEX
-sf read $UINITRD_ADDR $UINITRD_OFFHEX $UINITRD_SIZHEX
+fatload mmc 0 $UINITRD_ADDR /rescue/uInitrd
 
 setenv bootargs ${bootargs} ${cmdline} ${rescue_custom}
 
@@ -55,13 +40,12 @@ echo "activate emmc before run"
 
 mmc dev 1
 
+echo "[i] sleep 1 sec Ctrl+C for break boot"
+
 sleep 1
 
 bootm $UIMAGE_ADDR $UINITRD_ADDR
 
 echo ooooopsss
 
-sleep 10000
-
 ##END##
-

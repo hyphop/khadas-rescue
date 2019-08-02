@@ -16,7 +16,7 @@ cd $D
 
 md5sum *.bin > md5sum.list
 echo "$(date)" > created.date
-echo "READ ME " > README.txt
+echo "UPGRADE FILES" > README.txt
 
 cd $P
 

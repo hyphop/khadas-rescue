@@ -1,0 +1,79 @@
+#!/bin/sh
+
+## hyphop ##
+
+## prerape sd disk for spi upgrade
+
+DEV="$1"
+
+sudo=sudo
+
+D=/tmp/krescue.upgrade
+
+
+[ -d $D ] || mkdir $D
+
+UBOOT_SD=../share/u-boot.sd.bin
+
+[ -f $UBOOT_SD ] || {
+    echo "[e] not found $UBOOT_SD">&2
+    exit 1
+}
+
+P=$PWD
+
+DD=$D.disk.img
+
+OF=32768 ## 16M before
+
+S=$((64*1024*1024))
+BS=512
+
+CMD(){
+    echo "[#] $@">&2
+    "$@"
+}
+
+CMD dd if=/dev/zero count=$((S/$BS + $OF)) bs=$BS of=$DD
+CMD dd if=$UBOOT_SD bs=$BS conv=notrunc of=$DD
+printf "n\np\n1\n$OF\n\nw\nq\n" | fdisk $DD
+CMD dd if=$UBOOT_SD  bs=444 count=1 conv=notrunc of=$DD
+
+LOOP=$($sudo losetup -f)
+
+CMD $sudo losetup -o $((OF*$BS)) $LOOP $DD
+CMD $sudo mkfs.vfat -n rescue $LOOP
+CMD $sudo mount -o user,uid=$(id -u),gid=$(id -g) $LOOP $D
+
+RESCUE=/rescue
+
+[ -d $D$RESCUE ] || mkdir -p $D$RESCUE
+
+CMD cp ../docs/README-upgrade.md $D/README.TXT
+CMD cp ../share/image.spi.bin $D$RESCUE
+CMD cp ../share/uI* $D$RESCUE
+CMD cp ../share/linux.dtb $D$RESCUE/uboot.dtb
+CMD cp ../share/splash.bmp.gz $D$RESCUE
+CMD cp ../files/boot.sd.cmd $D$RESCUE
+CMD cp ../files/80_user_env.txt $D$RESCUE
+
+ls -l1 $D/* | tee $D$RESCUE/files.list
+md5sum $D/* > $D$RESCUE/files.md5sum
+echo "$(date)" > $D$RESCUE/generated.date
+
+CMD sync
+
+CMD $sudo losetup -d $LOOP
+
+echo "[i] rescue sd image: $DD is ready">&2
+
+[ -b "$DEV" ] && {
+
+    echo "[i] write image $DD -> $DEV flash disk! plz wait...">&2
+    CMD $sudo dd if=$DD of=$DEV conv=notrunc bs=8192
+    exit 
+}
+
+echo "[i] next command for write it">&2
+echo "./image2flash /tmp/krescue.upgrade.disk.img /dev/#your_drive " >&2
+

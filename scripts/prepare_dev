@@ -27,11 +27,13 @@ LN 80_user_env.txt    ../files/80_user_env.txt
 LN boot.spi.cmd       ../files/boot.spi.cmd 
 LN Image              ../../fenix/linux/arch/arm64/boot/Image 
 LN image.spi.bin      /tmp/krescue.image.bin 
-LN Initrd             ../../khadas-openwrt/initramfs-rescue.xz.squashfs 
+LN Initrd             ../../openwrt/initramfs-rescue.xz.squashfs
+#LN Initrd             ../../khadas-openwrt/initramfs-rescue.xz.squashfs 
 LN linux.dtb          ../../fenix/linux/arch/arm64/boot/dts/amlogic/kvim3_linux.dtb
 LN splash.bmp.gz.make ../files/splash.bmp.gz.make
 LN splash.svg         ../files/splash.svg
-LN u-boot.bin         ../../fenix/u-boot/fip/_tmp/u-boot.bin
+LN u-boot.spi.bin         ../../fenix/u-boot/fip/_tmp/u-boot.bin
+LN u-boot.sd.bin         ../../fenix/u-boot/fip/_tmp/u-boot.bin.sd.bin
 
 LN dhcp.upgrade_spi_flash.cmd_  	../scripts/dhcp/dhcp.upgrade_spi_flash.cmd
 LN dhcp.upgrade_spi_flash.make  	../scripts/dhcp/autoscript.make
