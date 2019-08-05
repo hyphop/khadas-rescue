@@ -24,7 +24,7 @@ https://github.com/hyphop/khadas-rescue
 + fully automations
 + advanced smart boot sequences
 + hot keys
-+ read more [docs/README-rescue.md](docs/README-rescue)
++ read more [docs/README-rescue.md](docs/README-rescue.md)
 
 ## what can i get from this 
 
