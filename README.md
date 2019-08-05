@@ -2,7 +2,7 @@
 
 ## status
 
-experemintal!!!, tested on for VIM3 v1.2
+experemintal!!!, tested on VIM3 boards only!
 
 https://github.com/hyphop/khadas-rescue
 
@@ -35,6 +35,10 @@ https://github.com/hyphop/khadas-rescue
 + andvanced rescue system with resize move fsck and many other tools 
 + we have access to device via usb_net, wifi_ap, wifi_sta, eth_dhcp, usb_storage, ssh, http ...
 + no need any thing , we can use only usb-C cable or jsut wifi connection, no need uart, ethernet, flash, sd
+
+## downloads system images
+
++ https://github.com/hyphop/khadas-rescue/releases
 
 ## dirs and files
 
