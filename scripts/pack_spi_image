@@ -2,9 +2,8 @@
 
 ## hyphop ##
 
+##
 ## openwrt spi image builder ...
-##
-##
 ##
 
 P=$(dirname $0)
@@ -20,7 +19,7 @@ S="$P/../share"
 
 NOCACHE=
 
-OUT=$UNI.image.bin
+OUT=$UNI.spi.bin
 OUT_SPI="$S/image.spi.bin"
 
 # kernel run from there
@@ -39,6 +38,7 @@ UBOOT_LOGOS=$S/*.bmp.gz
 UBOOT_DTB=$S/*.dtb
 LINUX_U_IMAGE=$S/uImage
 LINUX_U_INITRD=$S/uInitrd
+
 LINUX_IMAGE=$S/Image
 LINUX_INITRD=$S/Initrd
 UBOOT_ENV=$S/ENV.txt
@@ -156,10 +156,10 @@ for UBOOT_LOGO in $UBOOT_LOGOS "" ; do
 
 done
 
-UBOOT_LOGO_SIZE=$(filesize $UBOOT_LOGO) || exit 1
+UBOOT_LOGO_SIZE=$(filesize $UBOOT_LOGO) #|| exit 1
 
 [ "$UBOOT_LOGO_SIZE" ] || {
-    echo "[i] zero size $UBOOT_LOGOS">&2
+    echo "[i] zero size UBOOT_LOGOS: $UBOOT_LOGOS">&2
     exit 1
 }
 
@@ -210,18 +210,33 @@ CKERNEL=$UNI.Image.$KERNEL_CMP
 
 KNAME=$(basename $CKERNEL)
 
-[ -f $CKERNEL ] || {
-    echo "[i] compress kernel $LINUX_IMAGE">&2
-    CMD lzma -c $LINUX_IMAGE > $CKERNEL
+CMPDATE(){
+    a="$(stat -Lc%Y $1 2>/dev/null)"
+    b="$(stat -Lc%Y $2 2>/dev/null)"
+    echo "[i] cmp date $1:$a $2:$b - $((b-a))s">&2
+    [ -f $2 ] || return 0
+    [ "$a" -gt "$b" ]
 }
 
+
+#rm $CKERNEL
+
+#[ -f $CKERNEL ] || {
+
+    CMPDATE $LINUX_IMAGE $CKERNEL && {
+	echo "[i] compress kernel $LINUX_IMAGE">&2
+	CMD lzma -c $LINUX_IMAGE > $CKERNEL
+    }
+
+#}
+
+CMPDATE $CKERNEL $LINUX_U_IMAGE && {
 CMD mkimage -A arm64 -O linux -C $KERNEL_CMP \
 	-T kernel -a $LINUX_ADDR -e $LINUX_ADDR \
 	-n "$KNAME" -d $CKERNEL $LINUX_U_IMAGE || {
-
-    echo "[e] error mkimage ">&2
-    exit 1
-
+	    echo "[e] error mkimage ">&2
+	    exit 1
+	}
 }
 
 LINUX_U_IMAGE_SIZE=$(filesize $LINUX_U_IMAGE) || exit 1
@@ -238,6 +253,7 @@ LINUX_INITRD_SIZE=$(filesize $LINUX_INITRD) || exit 1
     exit 1
 }
 
+CMPDATE $LINUX_INITRD $LINUX_U_INITRD && {
 CMD mkimage -A arm64 \
     -O linux \
     -T ramdisk \
@@ -246,6 +262,7 @@ CMD mkimage -A arm64 \
     -e 0x00000000 \
     -n uInitrd \
     -d $LINUX_INITRD $LINUX_U_INITRD
+}
 
 LINUX_U_INITRD_SIZE=$(filesize $LINUX_U_INITRD)
 
@@ -274,12 +291,22 @@ HEX(){
     printf "0x%06X" "$1"
 }
 
+TABLE_ROWS="|%08s|%08s|%08s|%08s|%08s|%04s|%-30s|\n"
+
+HR(){
+    echo "------------------------------\
+--------------------------------------\
+--------------">&2
+}
+
 FLINE(){
+
     n="$1"
     shift
     f="$1"
     shift
-    printf "|%08s|%08s|%08s|%08s|%08s|%04s|%-30s|\n" "$n" "$@" $(($2/$BLOCK_SIZH)) "$f"
+
+    printf $TABLE_ROWS "$n" "$@" $(($2/$BLOCK_SIZH)) "$f"
 
 echo "#$n
 ${n}_SIZE=$1
@@ -289,10 +316,17 @@ ${n}_OFFSET=$3
 ${n}_OFFHEX=$4
 " >> $SYS_ENV
 
-    [ -f "$f" ] || {
+    [ "$f" = "-" ] && {
 	return
     }
 
+    [ -f "$f" ] || {
+	echo "[e] not found $f">&2
+	return 1
+    }
+
+    CMPDATE $f "$S/$n.PAD" 2>/dev/null && {
+    HR
     dd if=/dev/zero bs=$BLOCK_SIZH \
 	count=$(($2/$BLOCK_SIZH)) \
 	of="$S/$n.PAD" 1>/dev/null 2>/dev/null
@@ -300,6 +334,7 @@ ${n}_OFFHEX=$4
 	count=$(($2/$BLOCK_SIZH)) \
 	conv=notrunc of="$S/$n.PAD" 1>/dev/null 2>/dev/null
 
+    }
 }
 
 o=0
@@ -330,6 +365,9 @@ s=$(PAD $UBOOT_BIN_SIZE)
 UBOOT_BIN_SIZE_PAD=$s
 o=$((o+$s))
 
+printf "$TABLE_ROWS" section size pad_size offset off_hex 32k source
+HR
+
 FLINE "UBOOT" $UBOOT_BIN \
     $UBOOT_BIN_SIZE $UBOOT_BIN_SIZE_PAD 0 0
 
@@ -343,6 +381,7 @@ UBOOT_DTB_SIZE=$((2*$BLOCK_SIZE)) ## 0x140000 offset
 s=$(PAD $UBOOT_DTB_SIZE)
 UBOOT_DTB_SIZE_PAD=$s
 o=$((o+$s))
+
 
 FLINE "DTB" $UBOOT_DTB $UBOOT_DTB_SIZE $UBOOT_DTB_SIZE_PAD \
     $UBOOT_DTB_OFFSET $UBOOT_DTB_OFFSET_HEX
@@ -460,8 +499,13 @@ done
 
 ln -sf $OUT $OUT_SPI
 
+ls -l1L $OUT
+
+gzip -c $OUT > $OUT.gz
+
+ls -l1L $OUT.gz
+
+echo "[i] image $OUT.gz - is ready">&2
+
 echo "[i] image $OUT_SPI -> $OUT - is ready">&2
-
-
-
 
