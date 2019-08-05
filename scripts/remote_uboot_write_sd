@@ -1,0 +1,57 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= u-boot write to SD via ssh
+
+[ $HOST] || HOST=root@vimu
+
+UPATH=../../fenix/u-boot/fip/_tmp
+UNAME=u-boot.bin.sd.bin
+
+UPATH=$(dirname $0)/../share
+UNAME=u-boot.sd.bin
+
+[ -f "$1" ] && UBOOT="$1"
+
+[ $DEV ] || DEV=mmcblk1
+
+[ $UBOOT ] || {
+
+for UBOOT in $UNAME $UPATH/$UNAME ; do
+    [ -f $UBOOT ] && break
+done
+
+}
+
+RDEV=/dev/$DEV
+
+[ -f "$UBOOT" ] || {
+    echo "[e] $UBOOT not found">&2
+    exit 1 
+}
+
+grep -q "U-Boot " $UBOOT  || {
+    echo "[e] $UBOOT signature not found">&2
+    exit 1 
+}
+
+echo "[w] $UBOOT > $HOST:$RDEV write $(stat -L -c%s $UBOOT) bytes">&2
+
+scp $UBOOT $HOST:/tmp && {
+
+echo "
+echo SSH_UBOOT_WRITE
+cat /sys/class/block/$DEV/device/name
+[ -b "$RDEV" ] || {
+    echo \"[i] $RDEV not find / insert sd card plz\"
+    exit 1
+}
+echo \"[i] wait 2 sec before write to $HOST:$RDEV\"
+sleep 2
+dd of=/dev/$DEV conv=fsync,notrunc bs=444 count=1 if=/tmp/$UNAME
+dd of=/dev/$DEV conv=fsync,notrunc bs=512 if=/tmp/$UNAME
+echo DONE
+" | ssh $HOST
+
+}

@@ -1,8 +1,9 @@
-# DHCP + TFTP server
+# SPI flash upgrade example via DHCP + TFTP
 
-we can use dhcp + tftp for load boot and check systems
-
-../scrips/net_tftp_server - this script shared working dir for tftp dhcp uploads
+we can use dhcp + tftp for upload files and boot systems ... ,
+just connect your working machine and device board by ethernet cable.
+start `../scrips/net_tftp_server` - this script which share `../share/`
+working dir for tftp dhcp uploads
 
 ## USAGE EXAMPLES
 
@@ -11,9 +12,15 @@ we can use dhcp + tftp for load boot and check systems
 1) prepare boot.scr just run `share/dhcp.upgrade_spi_flash.make`
 2) run it `../scrips/net_tftp_server`
 
-reboot device in uboot dhcp mode with next u-boot shell commands
+reboot device in uboot-dhcp mode
+
+if u have legacy uboot u press any key in UART serial terminal
+for stop normal boot process, and type this command line
 
     dhcp; tftp 0 boot.scr; autoscr 0
+
+if u have advanced uboot from krescue already, just press 
+middle hot key for activate dhcp+ftp mode
 
 after what we can see this output in serial-uart console
 

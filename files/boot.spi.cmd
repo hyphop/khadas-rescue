@@ -12,6 +12,12 @@ ENV_OFFHEX=0x168000
 
 SPI_HZ=104000000
 
+LOADER="sf read"
+
+echo "**KRESCUE LOAD FROM $BOOTED**"
+
+md.b ff800120 1
+
 echo "[i] sf probe $SPI_HZ"
 sf probe 0 $SPI_HZ
 
@@ -20,25 +26,25 @@ sf probe 0 $SPI_HZ
 #sf read ${addr_dtb} $DTB_OFFHEX $DTB_SIZHEX
 
 echo "load env"
-echo sf read $ENV_OFFHEX $ENV_OFFHEX $ENV_SIZHEX
-sf read $ENV_OFFHEX $ENV_OFFHEX $ENV_SIZHEX
+echo $LOADER $ENV_OFFHEX $ENV_OFFHEX $ENV_SIZHEX
+$LOADER $ENV_OFFHEX $ENV_OFFHEX $ENV_SIZHEX
 echo env import -t $ENV_OFFHEX $ENV_SIZHEX
 env import -t $ENV_OFFHEX $ENV_SIZHEX
 
 echo "load logo"
-echo sf read $LOGO_OFFHEX $LOGO_OFFHEX $LOGO_SIZHEX
-sf read $LOGO_OFFHEX $LOGO_OFFHEX $LOGO_SIZHEX
+echo $LOADER $LOGO_OFFHEX $LOGO_OFFHEX $LOGO_SIZHEX
+$LOADER $LOGO_OFFHEX $LOGO_OFFHEX $LOGO_SIZHEX
 bmp display $LOGO_OFFHEX 0 0
 
 echo "load kernel"
-echo sf read $UIMAGE_ADDR $UIMAGE_OFFHEX $UIMAGE_SIZHEX
-sf read $UIMAGE_ADDR $UIMAGE_OFFHEX $UIMAGE_SIZHEX
+echo $LOADER $UIMAGE_ADDR $UIMAGE_OFFHEX $UIMAGE_SIZHEX
+$LOADER $UIMAGE_ADDR $UIMAGE_OFFHEX $UIMAGE_SIZHEX
 
 echo "load initrd"
-echo sf read $UINITRD_ADDR $UINITRD_OFFHEX $UINITRD_SIZHEX
-sf read $UINITRD_ADDR $UINITRD_OFFHEX $UINITRD_SIZHEX
+echo $LOADER $UINITRD_ADDR $UINITRD_OFFHEX $UINITRD_SIZHEX
+$LOADER $UINITRD_ADDR $UINITRD_OFFHEX $UINITRD_SIZHEX
 
-setenv bootargs ${bootargs} ${cmdline} ${rescue_custom}
+setenv bootargs ${bootargs} ${cmdline} ${rescue_custom} booted="$BOOTED"
 
 setenv bootargs ${bootargs} console=tty0 console=ttyS0,115200n8 no_console_suspend consoleblank=0
 setenv bootargs ${bootargs} vout=${outputmode},enable hdmitx=${cecconfig},${colorattribute}

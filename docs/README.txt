@@ -1,7 +1,8 @@
 # docs folder descriptions txt
 
    
-+ README-upgrade.md        - Krescue SD / SPI upgdate
-+ dhcp.md                  - DHCP + TFTP server
-+ install-to-spi-flash.md  - install to spi-flash
-+ location-table.md        - Krescue 
++ README-rescue.md         - Rescue sd/mmc/usb image help
++ README-upgrade.md        - Krescue auto upgrade for SPI-flash from bootable sd card
++ location-table.md        - SPI flash locations table descriptions
++ spi-upgrade_sd.md        - SPI flash upgdate via SD/USB card
++ spi_upgrade_dhcp.md      - SPI flash upgrade example via DHCP + TFTP

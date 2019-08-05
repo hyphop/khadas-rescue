@@ -1,8 +1,8 @@
 # scripts folder descriptions txt
 
 + bin/                     - bin files
-+ conf/                    - shared configs for scripts
-+ dhcp/                    - dhcp scripts for u-boot
++ conf/                    - conf folder descriptions md
++ dhcp/                    - dhcp folder descriptions md
 + runas/                   - runas exec program as another USER or GROUP / UID GID
    
 + clean                    - clean share
@@ -11,12 +11,13 @@
 + net_forward              - simple ip forward traffic manager linux example
 + net_server_ip_setup      - tftp dhcp IP setup watch dog
 + net_tftp_server          - tftp dhcp server + traffic forward
-+ pack_spi_image           - krescue spi image builder ...
++ pack_image               - krescue image builder ... SPI + ....
 + prepare                  - prepare & downloads some bins
-+ prepare_dev_dhcp         - prepare dhcp script
++ prepare_dhcp_boot        - prepare dhcp script for next full boot
 + prepare_from_bins        - prepare & downloads some bins
 + prepare_sd_image_ext4    - prerape sd disk for spi upgrade / ext4
 + prepare_sd_image_rescue  - prerape rescue image for sd/usb/mmc disk - vfat
-+ prepare_sd_image_upgrade - prerape sd disk for spi upgrade
++ prepare_sd_image_upgrade_spi - prerape sd disk for spi upgrade
 + prepare_share            - prepare share space
 + prepare_tools            - prepare additional tools
++ remote_uboot_write_sd    - u-boot write to SD via ssh

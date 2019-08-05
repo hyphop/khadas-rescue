@@ -2,9 +2,36 @@
 
 ## hyphop ##
 
-#= krescue spi image builder ...
+#= krescue image builder ... SPI + ....
+
+USAGE(){ echo "
+USAGE pack_spi_image [-r|-h]
+
+";}
 
 P=$(dirname $0)
+
+DIR=$PWD
+
+REBUILD_RESCUE=
+
+case "$@" in
+    -r)
+    REBUILD_RESCUE=1
+    ;;
+esac
+
+## rebuild rescue image
+
+[ "$REBUILD_RESCUE" ] && {
+echo "[i] rebuild rescue">&2
+cd $P/../../openwrt/ 1>/dev/null 2>/dev/null && {
+[ -x ./create_squashfs ] && {
+    ./create_squashfs initramfs-rescue
+}
+}
+cd $DIR
+}
 
 FLASH_SIZE=$((1024*1024*16))
 
@@ -220,6 +247,10 @@ CMPDATE(){
 #rm $CKERNEL
 
 #[ -f $CKERNEL ] || {
+
+lzma -dc $CKERNEL >/dev/null || {
+    rm $CKERNEL
+}
 
     CMPDATE $LINUX_IMAGE $CKERNEL && {
 	echo "[i] compress kernel $LINUX_IMAGE">&2

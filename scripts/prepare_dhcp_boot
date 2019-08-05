@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-#= prepare dhcp script
+#= prepare dhcp script for next full boot
 
 SHARE=$(dirname $0)/../share
 

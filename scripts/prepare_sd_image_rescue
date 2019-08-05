@@ -4,11 +4,26 @@
 
 #= prerape rescue image for sd/usb/mmc disk - vfat
 
-## usage ./prapare_sd_image_rescue [/dev/FLASHDISK]
+## usage ./prapare_sd_image_rescue [ /dev/FLASHDISK ] | [ @remote_host ]
 
 DEV="$1"
 
 sudo=sudo
+
+
+REBUILD_RESCUE=
+
+case "$@" in
+    -r)
+    REBUILD_RESCUE=1
+    ;;
+esac
+
+## rebuild rescue image
+
+[ "$REBUILD_RESCUE" ] && {
+    $(dirname $0)/pack_image -r
+}
 
 D=/tmp/krescue.sd
 
@@ -50,7 +65,7 @@ RESCUE=/rescue
 
 [ -d $D$RESCUE ] || mkdir -p $D$RESCUE
 
-CMD cp ../docs/README-upgrade.md $D/README.TXT
+CMD cp ../docs/README-rescue.md $D/README.TXT
 CMD cp ../share/uI* $D$RESCUE
 CMD cp ../share/linux.dtb $D$RESCUE/uboot.dtb
 CMD cp ../share/splash.bmp.gz $D$RESCUE
@@ -58,12 +73,14 @@ CMD cp ../files/boot.sd.cmd $D$RESCUE
 CMD cp ../files/80_user_env.txt $D$RESCUE
 
 ls -l1 $D/* | tee $D$RESCUE/files.list
-md5sum $D/* > $D$RESCUE/files.md5sum
+md5sum $D/$RESCUE/* > $D$RESCUE/files.md5sum
 echo "$(date)" > $D$RESCUE/generated.date
 
 CMD sync
 
-CMD $sudo losetup -d $LOOP
+CMD $sudo losetup -d $LOOP || {
+    echo "[i] loop $LOOP still used">&2
+}
 
 echo "[i] rescue sd image: $DD is ready">&2
 
@@ -75,6 +92,12 @@ ls -Ll1 $DD.gz
 
 [ -b "$DEV" ] && {
 
+#    echo "[i] type Y for allow write to $DEV">&2
+#    [ "$(read YES)" = "Y" ] || {
+#	echo "[w] owe wait only Y not $YES">&2
+#	exit 1
+#    }
+
     echo "[i] write image $DD -> $DEV flash disk! plz wait...">&2
     CMD $sudo dd if=$DD of=$DEV conv=notrunc bs=8192
     CMD sync
@@ -82,6 +105,16 @@ ls -Ll1 $DD.gz
     exit 
 }
 
-echo "[i] next command for write it">&2
+case $DEV in
+    *@*)
+    CMD ssh root@${DEV#*@} dd of=/dev/mmcblk1 bs=4096 < $DD
+    exit
+    ;;
+esac
+
+echo "[i] maybe next command for write it">&2
 echo "./image2flash /tmp/krescue.upgrade.disk.img /dev/#your_drive " >&2
+echo "# or remote write to sd">&2
+echo "ssh root@vimu dd of=/dev/mmcblk1 bs=4096 < /tmp/krescue.spi.bin">&2
+
 

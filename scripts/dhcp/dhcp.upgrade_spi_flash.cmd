@@ -23,7 +23,21 @@ sf update $ADDR 0 $filesize
 
 echo "END"
 
-sleep 1000
+## setup bootmode u-boot from SPI
+
+kbi bootmode r
+
+echo "[i] use next command line for activate boot from spi flash"
+
+echo "kbi bootmode w spi; kbi poweroff; echo press POWER_ON key"
+
+# kbi bootmode w spi; kbi poweroff; echo press POWER_ON key"
+
+WAIT=1000
+
+echo "[i] wait $WAIT sec! plz use Ctrl+C for break it"
+
+sleep $WAIT
 
 
 ##END##

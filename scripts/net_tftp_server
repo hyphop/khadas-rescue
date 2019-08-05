@@ -7,8 +7,11 @@
 RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/dhcp.conf
 
 ## need a root privs
-for runas in runas sudo; do
-    which $runas 1>/dev/null && break
+for runas in $DP/bin/runas runas sudo; do
+    which $runas 1>/dev/null && {
+    echo "[i] runas = $runas">&2
+    break
+    }
 done
 
 $runas $(which pkill) -f $PID_FILE
@@ -53,7 +56,7 @@ $ifconfig $DEV up
 dnsmasq="$runas $(which dnsmasq)"
 
 RUNIT(){
-    echo "[i] #! $@">&2
+    echo "[#] $@">&2
     "$@"
 }
 
@@ -78,6 +81,9 @@ $runas $DP/net_forward start
 
 #echo "$IP" > /tmp/dhcp_host.ip
 
+echo "[i] uboot cmd usage example">&2
+echo "[i] dhcp; tftp 0 boot.scr; autoscr 0">&2
+ 
 RUNIT $dnsmasq $debug -p0 $RUNAS	\
 	-z -i $DEV			\
 	--enable-tftp=$DEV \
@@ -90,3 +96,4 @@ RUNIT $dnsmasq $debug -p0 $RUNAS	\
 	--dhcp-range=$IP0,$IP1,240h	\
 	--dhcp-leasefile=$LEASE_FILE	\
 	-x $PID_FILE "$@"
+

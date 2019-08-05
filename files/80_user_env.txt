@@ -5,7 +5,9 @@
 UIMAGE_ADDR=0x30000000
 UINITRD_ADDR=0x40000000
 
-rescue_custom=wifi_ssid=VIM3
+rescue_custom="wifi_ssid=VIM3 wifi_passw=12345678 "
+
+#passw=khadas
 
 cmdline=root=/dev/ram0 rw init=/init panic=10 net.ifnames=0 loglevel=3
 

@@ -25,10 +25,11 @@ echo "[i] $IN > $OUT">&2
     exit 1
 }
 
+OUT=boot.scr
 #CMD $B/../scripts/cmd2scr ${0%.*}.cmd_ ${0%.*}.scr
 CMD $PACK $IN $OUT
 
 cd $B
 
-ln -sf $OUT boot.scr
+#ln -sf $OUT boot.scr
 ln -sf $OUT C0A86479.img

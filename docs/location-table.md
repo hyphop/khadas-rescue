@@ -1,6 +1,4 @@
-# Krescue 
-
-# spi locations table example
+# SPI flash locations table descriptions
 
 one block=1024*32 bytes, all parts padded by this block
 
