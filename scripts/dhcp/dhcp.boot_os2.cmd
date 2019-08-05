@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-# boot os script example
+#= boot os script example
 
 ext4load mmc 1:7 0 uboot.run.script
 script 0

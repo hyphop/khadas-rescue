@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-## script mkimage auto packer
+#= mkimage wrapper for uboot auto script 
 
 B="$(dirname $0)"
 

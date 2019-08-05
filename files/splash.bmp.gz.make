@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-## smart svg -> bmp rgb565 gz converter
+#= smart svg -> bmp rgb565 gz converter
 
 #inkscape=$(which inkscape 2>/dev/null)
 

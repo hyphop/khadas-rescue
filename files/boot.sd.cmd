@@ -2,6 +2,8 @@
 
 ## hyphop ##
 
+#= uboot script boot rescue system from sd/usb/mmc fat 
+
 echo "**RESCUE LOAD FROM SD**"
 
 ENV_OFFHEX=0x168000

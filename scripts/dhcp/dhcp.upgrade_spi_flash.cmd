@@ -2,6 +2,8 @@
 
 ## hyphop ##
 
+#= uboot script for spi flash update
+
 echo "[i] DHCP boot script $now"
 echo "[i] full spi flash write"
 

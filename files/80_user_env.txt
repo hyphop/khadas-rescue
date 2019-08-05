@@ -1,5 +1,7 @@
 # user env
 
+#= user uboot env
+
 UIMAGE_ADDR=0x30000000
 UINITRD_ADDR=0x40000000
 

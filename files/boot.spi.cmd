@@ -2,6 +2,8 @@
 
 ## hyphop ##
 
+#= uboot script boot rescue system from spi flash
+
 ## PREPARE
 
 ### fixed

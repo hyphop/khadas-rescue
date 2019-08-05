@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-## LIBREELEC RUN example
+#= LIBREELEC RUN example
 
 #setenv bootargs root=/dev/ram0 rw init=/init panic=10 net.ifnames=0 loglevel=3 console=tty0 console=ttyS0,115200n8 
 #no_console_suspend consoleblank=0 

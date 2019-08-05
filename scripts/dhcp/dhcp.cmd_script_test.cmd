@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-## loop script test
+#= loop script test
 
 ADDR=0x1000000
 
