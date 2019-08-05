@@ -10,12 +10,19 @@ DEV="$1"
 
 sudo=sudo
 
-
 REBUILD_RESCUE=
 
 case "$@" in
     -r)
     REBUILD_RESCUE=1
+    ;;
+    *@*)
+    DEV="$1"
+    ;;
+    *)
+    [ -b "$1" ] && {
+	DEV="$1"
+    }
     ;;
 esac
 
@@ -101,13 +108,17 @@ ls -Ll1 $DD.gz
     echo "[i] write image $DD -> $DEV flash disk! plz wait...">&2
     CMD $sudo dd if=$DD of=$DEV conv=notrunc bs=8192
     CMD sync
+    echo "[i] DONE">&2
 
-    exit 
+    exit
 }
 
 case $DEV in
     *@*)
-    CMD ssh root@${DEV#*@} dd of=/dev/mmcblk1 bs=4096 < $DD
+    TO="root@${DEV#*@}"
+    echo "[i] remote ssh write image $DD to sd">&2
+    CMD ssh $TO dd of=/dev/mmcblk1 conv=sync bs=4096 < $DD
+    echo "[i] DONE">&2
     exit
     ;;
 esac
