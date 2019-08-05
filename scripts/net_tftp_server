@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-## tftp dhcp server + traffic forward
+#= tftp dhcp server + traffic forward
 
 RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/dhcp.conf
 

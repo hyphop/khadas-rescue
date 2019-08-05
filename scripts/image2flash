@@ -2,6 +2,8 @@
 
 ## hyphop ##
 
+#= write image to block dev (sd/mmc/usb flash card)
+
 [ "$DEV" ] || DEV="$2"
 [ "$DEV" ] || DEV=/dev/mmcblk0
 

@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-# prepare for devs
+#= prepare share space
 
 SHARE=$(dirname $0)/../share
 

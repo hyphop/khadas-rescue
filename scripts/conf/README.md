@@ -1,0 +1,3 @@
+# shared configs for scripts
+
+

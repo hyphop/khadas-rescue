@@ -2,7 +2,12 @@
 
 ## hyphop ##
 
-## ugly git commit automate / for lazy guys as me 
+#= ugly git commit automate / for lazy guys like me
+
+## USAGE
+
+    ./git_add_commit_push [messages] [messages]
+
 
 msg="$@"
 

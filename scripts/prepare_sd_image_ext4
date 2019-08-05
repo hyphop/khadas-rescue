@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-## prerape sd disk for spi upgrade
+#= prerape sd disk for spi upgrade / ext4
 
 OUT="$1"
 

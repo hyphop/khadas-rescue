@@ -1,6 +1,8 @@
 !.gitignore
 share/*
+bin/*
+scripts/bin/*
 !README.md
-!README.md
+!README.txt
 
 

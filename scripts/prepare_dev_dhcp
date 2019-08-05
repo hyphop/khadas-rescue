@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-# prepare for devs
+#= prepare dhcp script
 
 SHARE=$(dirname $0)/../share
 

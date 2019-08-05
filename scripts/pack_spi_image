@@ -2,9 +2,7 @@
 
 ## hyphop ##
 
-##
-## openwrt spi image builder ...
-##
+#= krescue spi image builder ...
 
 P=$(dirname $0)
 

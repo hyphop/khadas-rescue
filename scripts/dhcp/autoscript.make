@@ -32,6 +32,3 @@ cd $B
 
 ln -sf $OUT boot.scr
 ln -sf $OUT C0A86479.img
-
-
-

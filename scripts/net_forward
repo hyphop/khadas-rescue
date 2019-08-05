@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-# simple ip forward traffic manager linux example
+#= simple ip forward traffic manager linux example
 
 BIN=$0
 PROG=`basename $0`

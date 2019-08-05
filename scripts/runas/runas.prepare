@@ -1,0 +1,22 @@
+#!/bin/sh
+
+## hyphop ##
+
+set -e
+
+echo "[i] $0">&2
+
+runas=$1
+
+[ "$runas" ] || \
+    runas=../bin/runas
+
+echo ""
+
+[ -d $runasd ] || mkdir -p $runasd
+
+chown root:root $runas
+chmod u+s $runas
+ls -l1a $runas
+
+

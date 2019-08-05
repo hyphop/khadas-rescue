@@ -2,6 +2,8 @@
 
 ## hyphop ##
 
+#= clean share
+
 P=$(dirname $0)
 
 UNI=/tmp/krescue

@@ -2,7 +2,7 @@
 
 ## hyphop ##
 
-## prepare from bins
+#= prepare & downloads some bins
 
 RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/downloads.conf
 

@@ -2,4 +2,6 @@
 
 ## hyphop ##
 
+#= uboot cmd script mkimage wrapper
+
 mkimage -C none -A arm -T script -d $1 $2

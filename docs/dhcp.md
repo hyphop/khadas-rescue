@@ -1,6 +1,6 @@
-# DHCP 
+# DHCP + TFTP server
 
-we can use dhcp for dev 
+we can use dhcp + tftp for load boot and check systems
 
 ../scrips/net_tftp_server - this script shared working dir for tftp dhcp uploads
 
@@ -8,7 +8,7 @@ we can use dhcp for dev
 
 ### full spi flash upgrade
 
-1) prepare `share/dhcp.upgrade_spi_flash.make`
+1) prepare boot.scr just run `share/dhcp.upgrade_spi_flash.make`
 2) run it `../scrips/net_tftp_server`
 
 reboot device in uboot dhcp mode with next u-boot shell commands

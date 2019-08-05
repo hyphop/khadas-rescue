@@ -1,0 +1,40 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= prepare file decriptions md / txt formats
+
+[ "$mode" ] || mode=md
+
+echo "## > README.$mode">&2
+
+echo "# $(basename $PWD) folder descriptions $mode
+"
+
+for F in "$@"; do
+
+#    echo "[.] $F">&2
+    [ "$F" = "_" ] && echo "   "
+
+    [ -f "$F" ] && {
+
+
+    d=$(egrep "^#=" "$F" 2>/dev/null || egrep -m1 "^#" "$F" 2>/dev/null)
+    d=${d#\#= }
+    d=${d#\# }
+
+    F=${F%README.*}
+
+    [ "$F" ] || continue
+
+    [ "$mode" = "md" ] && {
+	printf "+ [%s](%s) - %s\n" "$F" "$F" "$d"
+    }
+    [ "$mode" = "txt" ] && {
+	printf "+ %-24s - %s\n" "$F" "$d"
+    }
+
+
+
+    }
+done

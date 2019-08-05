@@ -1,1 +1,1 @@
-# dhcp scripts
+# dhcp scripts for u-boot

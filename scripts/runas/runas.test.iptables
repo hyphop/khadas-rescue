@@ -1,0 +1,9 @@
+#!/bin/sh
+
+## hyphop ##
+
+cd $(dirname $0)
+
+../bin/runas $(which iptables) -L
+
+

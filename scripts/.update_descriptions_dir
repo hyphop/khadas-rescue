@@ -1,0 +1,13 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= update folder descriptions for dir
+
+export mode=md
+${0%_dir} */README.$mode _ * > README.$mode
+export mode=txt
+${0%_dir} */README.md _ * > README.$mode
+
+
+

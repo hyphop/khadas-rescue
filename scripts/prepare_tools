@@ -1,0 +1,11 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= prepare additional tools
+
+echo "[i] prepare runas">&2
+
+cd $(dirname $0)/runas
+./runas.make
+

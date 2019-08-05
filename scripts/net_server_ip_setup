@@ -1,0 +1,29 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= tftp dhcp IP setup watch dog
+
+RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/dhcp.conf
+
+runas=$DP/bin/runas
+
+ifconfig="$runas $(which ifconfig)"
+
+[ "$1" ] || \
+echo "[i] ip config watch dog">&2
+
+while [ "LOOP" ] ; do
+
+$ifconfig $DEV | grep $IP || {
+
+$ifconfig $DEV $IP netmask $MASK
+$ifconfig $DEV up
+
+}
+
+[ ! "$1" ] || break
+
+sleep 2
+
+done

@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+#use strict;
+
+my $group = 'proxy';
+my $gid = getgrnam($group) || die "Cannot identify gid";
+$) = $gid;
+exec @ARGV
