@@ -4,7 +4,7 @@
 
 #= prerape rescue image for sd/usb/mmc disk - vfat
 
-## usage ./prapare_sd_image_rescue [ /dev/FLASHDISK ] | [ @remote_host ]
+## usage ./prapare_sd_image_rescue [-r] [ /dev/FLASHDISK ] | [ @remote_host ]
 
 DEV="$1"
 
