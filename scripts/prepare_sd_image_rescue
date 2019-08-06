@@ -77,6 +77,8 @@ CMD cp ../share/uI* $D$RESCUE
 CMD cp ../share/linux.dtb $D$RESCUE/uboot.dtb
 CMD cp ../share/splash.bmp.gz $D$RESCUE
 CMD cp ../files/boot.sd.cmd $D$RESCUE
+CMD cp ../files/boot.sd.make $D$RESCUE
+CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.sd.cmd $D$RESCUE/boot.sd.scr
 CMD cp ../files/80_user_env.txt $D$RESCUE
 
 ls -l1 $D/* | tee $D$RESCUE/files.list
