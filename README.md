@@ -2,7 +2,7 @@
 
 ## status
 
-experemintal!!!, tested on VIM3 boards only!
+Experimental!!!, tested on VIM3 boards only!
 
 https://github.com/hyphop/khadas-rescue
 
