@@ -37,9 +37,10 @@ https://github.com/hyphop/khadas-rescue
 + we have access to device via usb_net, wifi_ap, wifi_sta, eth_dhcp, usb_storage, ssh, http ...
 + no need any thing , we can use only usb-C cable or jsut wifi connection, no need uart, ethernet, flash, sd
 
-## downloads system images
+## releases - downloads images
 
 + https://github.com/hyphop/khadas-rescue/releases
++ https://github.com/hyphop/khadas-rescue/releases/tag/vim2
 + https://github.com/hyphop/khadas-rescue/releases/download/vim2/krescue.sd.img.gz - VIM2 sd card image
 
 ## write VIM2 SD image - example
