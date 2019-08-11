@@ -101,6 +101,8 @@ ls -l1 $D/* | tee $D$RESCUE/files.list
 echo "$(date)" > $D$RESCUE/generated.date
 
 CMD sync
+
+CMD tar -czf $D.tar.gz -C$D .
 CMD $sudo umount $D
 
 #CMD $sudo losetup -d $LOOP || {

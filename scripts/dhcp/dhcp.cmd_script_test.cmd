@@ -1,4 +1,4 @@
-## uboot srcipt
+#!script
 
 ## hyphop ##
 
