@@ -47,6 +47,8 @@ https://github.com/hyphop/khadas-rescue
     # u can run this one-command line anywhere on vims device or your working machine 
     # just write correct SD card location )))
     curl -jkL https://github.com/hyphop/khadas-rescue/releases/download/vim2/krescue.sd.img.gz -o- | gzip -dc | dd conv=sync of=/dev/YOUR_SD_CARD
+    # same with sudo
+    curl -jkL https://github.com/hyphop/khadas-rescue/releases/download/vim2/krescue.sd.img.gz -o- | gzip -dc | sudo dd conv=sync of=/dev/YOUR_SD_CARD
 
 ## dirs and files
 
