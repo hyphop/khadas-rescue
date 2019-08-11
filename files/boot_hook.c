@@ -6,6 +6,7 @@
 
 # plz dont use local vars on this stage
 */
+
 run_command_list("\n\
 setenv SCRIPT_ADDR 0x50000000\n\
 setenv BOOT_HOOK /rescue/boot.sd.scr\n\
@@ -19,4 +20,3 @@ if ext4load mmc 0 $SCRIPT_ADDR $BOOT_HOOK; then\n\
     exit 0\n\
 fi\n"
 ,-1,0);
-

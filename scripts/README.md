@@ -3,7 +3,9 @@
 + [bin/](bin/) - bin files
 + [conf/](conf/) - conf folder descriptions md
 + [dhcp/](dhcp/) - dhcp folder descriptions md
++ [http/](http/) - http folder descriptions md
 + [runas/](runas/) - runas exec program as another USER or GROUP / UID GID
++ [sd/](sd/) - sd folder descriptions md
    
 + [clean](clean) - clean share
 + [cmd2scr](cmd2scr) - uboot cmd script mkimage wrapper

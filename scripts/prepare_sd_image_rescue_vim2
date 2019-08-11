@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 ## hyphop ##
 
 #= prerape rescue image for sd/usb/mmc disk - vfat
@@ -52,7 +54,7 @@ DD=$D.img
 
 OF=3276 ## 1.6M before
 
-S=$((14*1024*1024))
+S=$((27*1024*1024))
 BS=512
 
 CMD(){
@@ -76,12 +78,16 @@ RESCUE=/rescue
 [ -d $D$RESCUE ] || mkdir -p $D$RESCUE
 
 CMD cp ../docs/README-rescue* $D
-CMD cp ../share/uI* $D$RESCUE
+CMD cp ../share/Image $D$RESCUE
+CMD cp ../share/uIn* $D$RESCUE
 CMD cp ../share/linux.dtb $D$RESCUE/uboot.dtb
+CMD cp ../share/*.dtb $D$RESCUE/
 CMD cp ../share/splash.bmp.gz $D$RESCUE
 CMD cp ../files/boot.sd.cmd $D$RESCUE
+CMD cp ../files/boot.am.cmd $D$RESCUE
 CMD cp ../files/boot.sd.make $D$RESCUE
 CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.sd.cmd $D$RESCUE/boot.sd.scr
+CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.am.cmd $D/s905_autoscript
 CMD cp ../files/80_user_env.txt $D$RESCUE
 
 SS=$D$RESCUE/scripts
@@ -89,7 +95,9 @@ SS=$D$RESCUE/scripts
 CMD cp ../scripts/sd/* $SS
 
 ls -l1 $D/* | tee $D$RESCUE/files.list
-md5sum $D/$RESCUE/* > $D$RESCUE/files.md5sum
+
+#md5sum $D/$RESCUE/* > $D$RESCUE/files.md5sum
+
 echo "$(date)" > $D$RESCUE/generated.date
 
 CMD sync

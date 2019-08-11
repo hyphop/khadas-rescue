@@ -9,7 +9,7 @@ RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/downloads.conf
 TO=../share
 
 CMD(){
-    echo "[#] $@"
+    echo "[#] $@" >&2
     "$@"
 }
 
@@ -40,6 +40,23 @@ DL(){
 
 }
 
+UNPACK(){
+
+    unpack=gzip
+
+    [ "$2" ] || exit 1
+
+    case $1 in
+	*.lzma)
+	unpack=lzma
+	;;
+    esac
+
+    echo "$unpack -dc $1 > $2">&2
+    $unpack -dc $1 > $2
+
+}
+
 cd $DP/$TO ||  {
     echo "[e] change dir">&2
     exit 1
@@ -49,24 +66,31 @@ echo "[i] preprate plz wait">&2
 echo "[i] download to $RP/$TO">&2
 
 T="$(basename $KERNEL_SRC)"
-DL "$DOWNLOAD_BASE/$KERNEL_SRC" "$T"
-[ -f "${T%.*}" ] || lzma -dc "$T" > "${T%.*}"
+DL "$DOWNLOAD_BASE/$KERNEL_SRC" "$T" || {
+T="$(basename ${KERNEL_SRC%.*})"
+DL "$DOWNLOAD_BASE/${KERNEL_SRC%.*}" "$T" 
+}
+
+[ -f "${T%.*}" ] || UNPACK "$T" "${T%.*}"
+
 
 T="$(basename $U_BOOT_SRC)"
 DL "$DOWNLOAD_BASE/$U_BOOT_SRC" "$T"
 
-[ -f "${T%.*}" ] || gzip -dc "$T" > "${T%.*}"
+[ -f "${T%.*}" ] || UNPACK "$T" "${T%.*}"
 
 T="$(basename $U_BOOT_SD_SRC)"
 DL "$DOWNLOAD_BASE/$U_BOOT_SD_SRC" "$T"
 
-[ -f "${T%.*}" ] || gzip -dc "$T" > "${T%.*}"
+[ -f "${T%.*}" ] || UNPACK "$T" "${T%.*}"
 
 T="$(basename $DTB_SRC)"
 DL "$DOWNLOAD_BASE/$DTB_SRC" "$T"
 
 T="$(basename $INITRD_SRC)"
 DL "$DOWNLOAD_BASE/$INITRD_SRC" "$T"
+
+LN rescue	.
 
 LN Initrd         	$T
 
@@ -77,6 +101,4 @@ LN boot.spi.cmd       ../files/boot.spi.cmd
 LN image.spi.bin      /tmp/krescue.image.bin 
 LN splash.bmp.gz.make ../files/splash.bmp.gz.make
 LN splash.svg         ../files/splash.svg
-
-
 

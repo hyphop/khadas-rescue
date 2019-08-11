@@ -2,7 +2,7 @@
 
 ## status
 
-experemintal!!!, tested on VIM3 boards only!
+experemintal!!!, tested on VIM3 VIM2 boards only!
 
 https://github.com/hyphop/khadas-rescue
 
@@ -40,7 +40,13 @@ https://github.com/hyphop/khadas-rescue
 ## downloads system images
 
 + https://github.com/hyphop/khadas-rescue/releases
++ https://github.com/hyphop/khadas-rescue/releases/download/vim2/krescue.sd.img.gz - VIM2 sd card image
 
+## write VIM2 SD image - example
+
+    # u can run this one-command line anywhere on vims device or your working machine 
+    # just write correct SD card location )))
+    curl -jkL https://github.com/hyphop/khadas-rescue/releases/download/vim2/krescue.sd.img.gz -o- | gzip -dc | dd conv=sync of=/dev/YOUR_SD_CARD
 
 ## dirs and files
 
@@ -55,7 +61,9 @@ https://github.com/hyphop/khadas-rescue
     # or
     ../scripts/prepare_dev
     # make image
-    ../scripts/pack_spi_image
+    ../scripts/pack_image
+    # other
+    ....
 
 ## to do
 

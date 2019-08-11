@@ -3,7 +3,9 @@
 + bin/                     - bin files
 + conf/                    - conf folder descriptions md
 + dhcp/                    - dhcp folder descriptions md
++ http/                    - http folder descriptions md
 + runas/                   - runas exec program as another USER or GROUP / UID GID
++ sd/                      - sd folder descriptions md
    
 + clean                    - clean share
 + cmd2scr                  - uboot cmd script mkimage wrapper

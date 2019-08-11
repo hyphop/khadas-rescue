@@ -1,6 +1,7 @@
 # docs folder descriptions md
 
    
++ [README-rescue-custom.md](README-rescue-custom.md) - Rescue custom usage
 + [README-rescue.md](README-rescue.md) - Rescue sd/mmc/usb image help
 + [README-upgrade.md](README-upgrade.md) - Krescue auto upgrade for SPI-flash from bootable sd card
 + [location-table.md](location-table.md) - SPI flash locations table descriptions

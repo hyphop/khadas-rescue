@@ -1,0 +1,10 @@
+#!/bin/sh
+
+## hyphop ##
+
+PRE=${0%_*}
+REL=${0#${PRE}_}
+
+echo "$PRE + $REL">&2
+
+REL=$REL $PRE

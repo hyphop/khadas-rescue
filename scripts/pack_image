@@ -50,6 +50,7 @@ OUT_SPI="$S/image.spi.bin"
 # kernel run from there
 LINUX_ADDR=0x01080000
 KERNEL_CMP=lzma
+KERNEL_CMP=gzip
 
 BLOCK_SIZE=$((1024*64))
 BLOCK_SIZH=$((1024*32))
@@ -127,7 +128,7 @@ done
 
 UBOOT_BIN_SIZE=$(filesize $UBOOT_BIN) || exit 1
 
-[ $UBOOT_BIN_SIZE -lt 1000000 ] && {
+[ $UBOOT_BIN_SIZE -lt 500000 ] && {
     echo "[e] wrong file $UBOOT_BIN">&2
     exit 1
 }
@@ -137,7 +138,7 @@ UBOOT_BIN_SIZE=$(filesize $UBOOT_BIN) || exit 1
 
 UBOOT_SCRIPT_TMP=$UNI.script.tmp
 UBOOT_SCRIPT_SCR=$UNI.script.scr
-UBOOT_SCRIPTS=
+UBOOT_SCRIPTS=0
 
 echo "#!script" > $UBOOT_SCRIPT_TMP
 
@@ -254,7 +255,7 @@ lzma -dc $CKERNEL >/dev/null || {
 
     CMPDATE $LINUX_IMAGE $CKERNEL && {
 	echo "[i] compress kernel $LINUX_IMAGE">&2
-	CMD lzma -c $LINUX_IMAGE > $CKERNEL
+	CMD $KERNEL_CMP -c $LINUX_IMAGE > $CKERNEL
     }
 
 #}
