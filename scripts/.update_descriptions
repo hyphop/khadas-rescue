@@ -8,7 +8,7 @@
 
 echo "## > README.$mode">&2
 
-echo "# $(basename $PWD) folder descriptions $mode
+echo "# $(basename $PWD) folder descriptions
 "
 
 for F in "$@"; do

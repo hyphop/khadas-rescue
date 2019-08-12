@@ -25,20 +25,29 @@ $LOADER $ENV_OFFHEX /rescue/80_user_env.txt
 echo env import -t $ENV_OFFHEX $filesize
 env import -t $ENV_OFFHEX $filesize
 
+# uboot diff 
+test "X$dtb_mem_addr" = "X" && dtb_mem_addr=$fdt_addr_r
+test "X$dtb_mem_addr" = "X" && dtb_mem_addr=$DTB_ADDR
+
 echo "load dtb to $dtb_mem_addr"
+echo $LOADER $dtb_mem_addr /rescue/linux.dtb
 $LOADER $dtb_mem_addr /rescue/linux.dtb
 fdt addr $dtb_mem_addr
 
+echo $LOADER $DTB_ADDR /rescue/linux.dtb
 $LOADER $DTB_ADDR /rescue/linux.dtb
 
 echo "load logo"
+echo $LOADER $LOGO_OFFHEX /rescue/splash.bmp.gz
 $LOADER $LOGO_OFFHEX /rescue/splash.bmp.gz
 bmp display $LOGO_OFFHEX 0 0
 
-echo "load kernel"
-$LOADER $UIMAGE_ADDR /rescue/Image
+#echo "load packed kernel"
+#echo $LOADER $UIMAGE_ADDR /rescue/uImage
+#$LOADER $UIMAGE_ADDR /rescue/uImage
 
 echo "load initrd"
+echo $LOADER $UINITRD_ADDR /rescue/uInitrd
 $LOADER $UINITRD_ADDR /rescue/uInitrd
 
 setenv bootargs ${cmdline} ${rescue_custom} booted=$BOOTED hwver=$hwver
@@ -56,20 +65,17 @@ echo "[i] bootargs: $bootargs"
 echo "[i] bootcmd:  $bootcmd"
 
 echo "activate emmc before run"
-
 mmc dev 1
 
 echo "[i] sleep 1 sec Ctrl+C for break boot"
-
 sleep 1
 
-bootm $UIMAGE_ADDR $UINITRD_ADDR 
+#bootm $UIMAGE_ADDR $UINITRD_ADDR 
+#echo opss
 
-echo opss
-
-echo "load kernel"
+echo "load raw kernel"
+echo $LOADER $IMAGE_ADDR /rescue/Image
 $LOADER $IMAGE_ADDR /rescue/Image
-
 booti $IMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
 
 echo ooooopsss

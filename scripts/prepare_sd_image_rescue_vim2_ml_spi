@@ -89,7 +89,8 @@ RESCUE=/rescue
 
 CMD cp ../docs/README-rescue* $D
 CMD cp ../share/Image $D$RESCUE
-CMD cp ../share/uIn* $D$RESCUE
+CMD cp ../share/uInitrd* $D$RESCUE
+#CMD cp ../share/uImage* $D$RESCUE
 CMD cp ../share/u-boot.*.bin $D$RESCUE
 CMD cp ../share/linux.dtb $D$RESCUE/uboot.dtb
 CMD cp ../share/*.dtb $D$RESCUE/

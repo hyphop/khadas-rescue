@@ -1,5 +1,8 @@
 # Krescue - tiny fast rescure system for khadas VIMs boards
 
+one universal rescue system for khadas vims boards
+we try to make one simple alternative way for solve common users problems!
+
 ## status
 
 experemintal!!!, tested on VIM3 VIM2 boards only!
@@ -8,20 +11,18 @@ https://github.com/hyphop/khadas-rescue
 
 ## features
 
-+ fully located in spi flash
++ fully located on SPI flash or on SD card
 + all in ram
 + very fast just a 10 sec full boot time
 + flash disks frendly
-+ extreme small
-+ openwrt based
-+ open source
++ extreme small about ~ 16M
++ openwrt based / open source
 + net eth (dhcp client) + wifi (ap + sta)
-+ usb gadged modes: usb_net + usb_storage
++ usb gadget modes: usb_net + usb_storage
 + kexec for advanced post boot other os
 + advanced uboot
 + rescue mode for repare install reinstall etc...
-+ fully customizations
-+ fully automations
++ fully customizations and automations
 + advanced smart boot sequences
 + hot keys
 + read more [docs/README-rescue.md](docs/README-rescue.md)
