@@ -1,0 +1,157 @@
+#!/bin/sh
+
+set -e
+
+## hyphop ##
+
+#= prerape rescue image for sd/usb/mmc disk - vfat
+
+## usage ./prapare_sd_image_rescue [-r] [ /dev/FLASHDISK ] | [ @remote_host ]
+
+DEV="$1"
+
+sudo=sudo
+
+REBUILD_RESCUE=
+
+for a in "$@"; do
+case $a in
+    -r)
+    REBUILD_RESCUE=1
+    ;;
+    *@*)
+    DEV="$a"
+    ;;
+    *)
+    [ -b "$a" ] && {
+	DEV="$a"
+    }
+    ;;
+esac
+done
+
+
+## rebuild rescue image
+
+[ "$REBUILD_RESCUE" ] && {
+    $(dirname $0)/pack_image -r
+}
+
+CMD(){
+    echo "[#] $@">&2
+    "$@"
+}
+
+D=/tmp/krescue.sd
+
+grep $D /proc/mounts && CMD $sudo umount $D
+CMD $sudo losetup -D
+
+[ -d $D ] || mkdir $D
+
+UBOOT_SD=../share/u-boot.sd.bin
+UBOOT_SPI=../share/u-boot.spi.bin
+
+[ -f $UBOOT_SD ] || {
+    echo "[e] not found $UBOOT_SD">&2
+    exit 1
+}
+
+P=$PWD
+
+DD=$D.img
+
+OF=3276 ## 1.6M before
+
+S=$((28*1024*1024))
+BS=512
+
+
+CMD dd if=/dev/zero count=$((S/$BS + $OF)) bs=$BS of=$DD
+CMD dd if=$UBOOT_SD bs=$BS conv=notrunc of=$DD
+printf "n\np\n1\n$OF\n\nw\nq\n" | fdisk $DD
+CMD dd if=$UBOOT_SD  bs=444 count=1 conv=notrunc of=$DD
+
+LOOP=$($sudo losetup -f)
+
+CMD $sudo losetup -o $((OF*$BS)) $LOOP $DD
+CMD $sudo mkfs.vfat -n rescue $LOOP
+CMD $sudo mount -o user,uid=$(id -u),gid=$(id -g) $LOOP $D
+
+RESCUE=/rescue
+
+[ -d $D$RESCUE ] || mkdir -p $D$RESCUE
+
+CMD cp ../docs/README-rescue* $D
+CMD cp ../share/Image $D$RESCUE
+CMD cp ../share/uIn* $D$RESCUE
+CMD cp ../share/u-boot.*.bin $D$RESCUE
+CMD cp ../share/linux.dtb $D$RESCUE/uboot.dtb
+CMD cp ../share/*.dtb $D$RESCUE/
+CMD cp ../share/splash.bmp.gz $D$RESCUE
+CMD cp ../files/boot.sd.cmd $D$RESCUE
+CMD cp ../files/boot.am.cmd $D$RESCUE
+CMD cp ../files/boot.sd.make $D$RESCUE
+CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.sd.cmd $D$RESCUE/boot.sd.scr
+CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.am.cmd $D/s905_autoscript
+CMD cp ../files/80_user_env.txt $D$RESCUE
+
+SS=$D$RESCUE/scripts
+[ -d $SS ] || CMD mkdir -p $SS
+CMD cp ../scripts/sd/* $SS
+
+ls -l1 $D/* | tee $D$RESCUE/files.list
+
+#md5sum $D/$RESCUE/* > $D$RESCUE/files.md5sum
+
+echo "$(date)" > $D$RESCUE/generated.date
+
+CMD sync
+
+CMD tar -czf $D.tar.gz -C$D .
+CMD $sudo umount $D
+
+#CMD $sudo losetup -d $LOOP || {
+CMD $sudo losetup -D || {
+    echo "[i] loop $LOOP still used">&2
+}
+
+echo "[i] rescue sd image: $DD is ready">&2
+
+ls -Ll1 $DD
+
+gzip -c $DD > $DD.gz
+
+ls -Ll1 $DD.gz
+
+[ -b "$DEV" ] && {
+
+#    echo "[i] type Y for allow write to $DEV">&2
+#    [ "$(read YES)" = "Y" ] || {
+#	echo "[w] owe wait only Y not $YES">&2
+#	exit 1
+#    }
+
+    echo "[i] write image $DD -> $DEV flash disk! plz wait...">&2
+    CMD $sudo dd if=$DD of=$DEV conv=notrunc bs=8192
+    CMD sync
+    echo "[i] DONE">&2
+
+    exit
+}
+
+case $DEV in
+    *@*)
+    TO="root@${DEV#*@}"
+    echo "[i] remote ssh write image $DD to sd">&2
+    CMD ssh $TO dd of=/dev/mmcblk1 conv=sync bs=4096 < $DD
+    echo "[i] DONE">&2
+    exit
+    ;;
+esac
+
+echo "[i] maybe next command for write it">&2
+echo "./image2flash /tmp/krescue.upgrade.disk.img /dev/#your_drive " >&2
+echo "# or remote write to sd">&2
+echo "ssh root@vimu dd of=/dev/mmcblk1 bs=4096 < /tmp/krescue.spi.bin">&2
+
