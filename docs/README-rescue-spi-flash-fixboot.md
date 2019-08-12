@@ -2,7 +2,7 @@
 
 if we have some boot trubles from spi flash like a loops freeze etc..
 just poweroff, short CS and GND pins (1 + 4 pins) on spi-flash, poweron. 
-OK we booted from emmc or sd! ...
+OK we booted from emmc or sd again! ... now we can fix booted issue .
 
 
 ```
