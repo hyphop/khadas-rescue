@@ -17,8 +17,12 @@
 + [prepare](prepare) - prepare & downloads some bins
 + [prepare_dhcp_boot](prepare_dhcp_boot) - prepare dhcp script for next full boot
 + [prepare_from_bins](prepare_from_bins) - prepare & downloads some bins
++ [prepare_from_bins_vim2](prepare_from_bins_vim2) - #!/bin/sh
++ [prepare_from_bins_vim3](prepare_from_bins_vim3) - #!/bin/sh
 + [prepare_sd_image_ext4](prepare_sd_image_ext4) - prerape sd disk for spi upgrade / ext4
 + [prepare_sd_image_rescue](prepare_sd_image_rescue) - prerape rescue image for sd/usb/mmc disk - vfat
++ [prepare_sd_image_rescue_vim2](prepare_sd_image_rescue_vim2) - prerape rescue image for sd/usb/mmc disk - vfat
++ [prepare_sd_image_rescue_vim2_ml_spi](prepare_sd_image_rescue_vim2_ml_spi) - prerape rescue image for sd/usb/mmc disk - vfat
 + [prepare_sd_image_upgrade_spi](prepare_sd_image_upgrade_spi) - prerape sd disk for spi upgrade
 + [prepare_share](prepare_share) - prepare share space
 + [prepare_tools](prepare_tools) - prepare additional tools

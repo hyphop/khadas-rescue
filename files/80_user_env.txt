@@ -10,13 +10,19 @@ IMAGE_ADDR=1080000
 #UINITRD_ADDR=10000000
 #DTB_ADDR=20000000
 
-rescue_custom="passw=khadas ap_ssid=Krescue ap_passw=12345678 wifi_mode=2g script=sd:hello.sh \
+rescue_custom="\
+passw=khadas \
+ap_ssid=Krescue \
+ap_passw=12345678 \
+wifi_mode=2g \
+script=sd:hello.sh \
+script=sd:sd2ram.sh \
 eth_hw=C0:4A:00:C0:3F:DB \
-script=http://github.com/hyphop/khadas-rescue/rescue/scripts/hello.sh"
+"
 
-cmdline=root=/dev/ram0 rw init=/init panic=10 net.ifnames=0 loglevel=8
+#script=http://github.com/hyphop/khadas-rescue/rescue/scripts/hello.sh"
+
+cmdline=root=/dev/ram0 rw init=/init panic=10 net.ifnames=0 loglevel=3
+
 # mtd=mtdparts=W25q128-flash.0:512k(uboot),-@0(full)
-
-#console=tty0 console=ttyS0,115200n8 no_console_suspend consoleblank=0
-#vout=${outputmode},enable hdmitx=${cecconfig},${colorattribute} hdmimode=${hdmimode} cvbsmode=${cvbsmode} osd_reverse=${osd_reverse} video_reverse=${video_reverse} jtag=${jtag} reboot_mode=${reboot_mode} ddr_size=${ddr_size}
 

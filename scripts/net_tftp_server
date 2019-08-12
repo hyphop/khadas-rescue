@@ -83,6 +83,7 @@ $runas $DP/net_forward start
 
 echo "[i] uboot cmd usage example">&2
 echo "[i] dhcp; tftp 0 boot.scr; autoscr 0">&2
+echo "[i] dhcp; tftp 1000000 boot.scr; source 1000000">&2
  
 RUNIT $dnsmasq $debug -p0 $RUNAS	\
 	-z -i $DEV			\

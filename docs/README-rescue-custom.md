@@ -48,3 +48,9 @@ all post script logged into /tmp/postscripts/logs
 
     $ cat /tmp/postscripts/logs/hello.log
     [i] simple message from sd '/tmp/postscripts/SD/hello.sh' script at Tue Aug  6 13:22:24 UTC 2019
+
+## post scripts
+
+* sd:sd2ram.sh - copy sd card to /tmp/rescue
+
+

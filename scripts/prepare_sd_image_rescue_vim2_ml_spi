@@ -14,6 +14,8 @@ sudo=sudo
 
 REBUILD_RESCUE=
 
+DEV2=/dev/mmcblk1
+
 for a in "$@"; do
 case $a in
     -r)
@@ -21,6 +23,9 @@ case $a in
     ;;
     *@*)
     DEV="$a"
+    ;;
+    /dev/mmc*)
+    DEV2=$a
     ;;
     *)
     [ -b "$a" ] && {
@@ -93,7 +98,11 @@ CMD cp ../files/boot.sd.cmd $D$RESCUE
 CMD cp ../files/boot.am.cmd $D$RESCUE
 CMD cp ../files/boot.sd.make $D$RESCUE
 CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.sd.cmd $D$RESCUE/boot.sd.scr
-CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.am.cmd $D/s905_autoscript
+CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.am.cmd $D/boot.scr
+## cp or links
+CMD cp $D/boot.scr $D/boot.scr.uimg
+CMD cp $D/boot.scr $D/s905_autoscript
+
 CMD cp ../files/80_user_env.txt $D$RESCUE
 
 SS=$D$RESCUE/scripts
@@ -143,8 +152,8 @@ ls -Ll1 $DD.gz
 case $DEV in
     *@*)
     TO="root@${DEV#*@}"
-    echo "[i] remote ssh write image $DD to sd">&2
-    CMD ssh $TO dd of=/dev/mmcblk1 conv=sync bs=4096 < $DD
+    echo "[i] remote ssh write image $DD to sd: $DEV2">&2
+    CMD ssh $TO dd of=$DEV2 conv=sync bs=4096 < $DD
     echo "[i] DONE">&2
     exit
     ;;

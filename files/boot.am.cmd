@@ -5,12 +5,20 @@
 #= uboot script boot rescue system from SD via default uboot
 #! OS dtb boot problem with lagacy android uboot
 
-LOADER="fatload mmc 0"
+test "X$devtype" = "X" && devtype=mmc
+test "X$devnum" = "X" && devnum=0
 
-echo "**KRESCUE LOAD FROM $BOOTED // $hwver **"
+#LOADER="fatload mmc 0"
+LOADER="fatload $devtype $devnum"
 
-ENV_OFFHEX=0x168000
-LOGO_OFFHEX=0x168000
+echo "**KRESCUE LOAD by $LOADER  FROM // $BOOTED // $hwver **"
+
+# main line reserverd mem
+#ENV_OFFHEX=0x168000
+#LOGO_OFFHEX=0x168000
+
+ENV_OFFHEX=0x1000000
+LOGO_OFFHEX=0x1000000
 
 echo "load env"
 $LOADER $ENV_OFFHEX /rescue/80_user_env.txt
@@ -28,7 +36,7 @@ $LOADER $LOGO_OFFHEX /rescue/splash.bmp.gz
 bmp display $LOGO_OFFHEX 0 0
 
 echo "load kernel"
-$LOADER $IMAGE_ADDR /rescue/Image
+$LOADER $UIMAGE_ADDR /rescue/Image
 
 echo "load initrd"
 $LOADER $UINITRD_ADDR /rescue/uInitrd
@@ -55,7 +63,14 @@ echo "[i] sleep 1 sec Ctrl+C for break boot"
 
 sleep 1
 
-bootm $UIMAGE_ADDR $UINITRD_ADDR || booti $IMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
+bootm $UIMAGE_ADDR $UINITRD_ADDR 
+
+echo opss
+
+echo "load kernel"
+$LOADER $IMAGE_ADDR /rescue/Image
+
+booti $IMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
 
 echo ooooopsss
 
