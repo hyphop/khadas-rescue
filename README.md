@@ -1,7 +1,7 @@
 # Krescue - tiny fast rescure system for khadas VIMs boards
 
-one universal rescue system for khadas vims boards
-we try to make one simple alternative way for solve common users problems!
+One universal rescue system for khadas vims boards.
+We try to make one simple alternative way for solve common users problems!
 
 ## status
 
