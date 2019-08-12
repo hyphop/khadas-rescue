@@ -2,12 +2,11 @@
 
 One universal rescue system for khadas vims boards.
 We try to make one simple alternative way for solve common users problems!
+https://github.com/hyphop/khadas-rescue
 
 ## status
 
 experemintal!!!, tested on VIM3 VIM2 boards only!
-
-https://github.com/hyphop/khadas-rescue
 
 ## features
 
