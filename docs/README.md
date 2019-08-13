@@ -1,5 +1,6 @@
 # docs folder descriptions
 
++ [README-rescue-bootmode.md](README-rescue-bootmode.md) - krescue bootmode
 + [README-rescue-custom.md](README-rescue-custom.md) - Rescue custom usage
 + [README-rescue-mmc-boot.md](README-rescue-mmc-boot.md) - krescue write uboot to eMMC flash
 + [README-rescue-spi-flash-fixboot.md](README-rescue-spi-flash-fixboot.md) - SPI flash reset/ignore boot from SPI flash
