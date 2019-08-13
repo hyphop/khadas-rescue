@@ -2,6 +2,7 @@
 
 ## hyphop ##
 
+#= prepare from bin vim3
 PRE=${0%_*}
 REL=${0#${PRE}_}
 

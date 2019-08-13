@@ -2,6 +2,8 @@
 
 ## hyphop ##
 
+#= preprage from bins vim2
+
 PRE=${0%_*}
 REL=${0#${PRE}_}
 

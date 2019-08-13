@@ -6,12 +6,12 @@ OK we booted from emmc or sd again! ... now we can fix booted issue .
 
 
 ```
- spi flash pinout
-       ___________
-1 CS  * @         * VCC    5
-2 DO  *           * HOLD   6
-3 WP  * w25q128   * CLOCK  7
-4 GND *___________* DI     8
+spi flash pinout + short for ignore spi
+             ___________
+ .--  1 CS  * @         * VCC    5
+ |    2 DO  *           * HOLD   6
+ |    3 WP  * w25q128   * CLOCK  7
+ `--  4 GND *___________* DI     8
 
 ```
 

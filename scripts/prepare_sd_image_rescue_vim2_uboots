@@ -4,7 +4,7 @@ set -e
 
 ## hyphop ##
 
-#= prerape rescue image for sd/usb/mmc disk - vfat
+#= prerape rescue image for sd/usb/mmc disk - vfat - uboots 
 
 ## usage ./prapare_sd_image_rescue [-r] [ /dev/FLASHDISK ] | [ @remote_host ]
 
@@ -68,7 +68,7 @@ DD=$D.img
 
 OF=3276 ## 1.6M before
 
-S=$((28*1024*1024))
+S=$((27*1024*1024))
 BS=512
 
 
@@ -90,8 +90,7 @@ RESCUE=/rescue
 CMD cp ../docs/README-rescue* $D
 CMD cp ../share/Image $D$RESCUE
 CMD cp ../share/uInitrd* $D$RESCUE
-#CMD cp ../share/uImage* $D$RESCUE
-CMD cp ../share/u-boot.*.bin $D$RESCUE
+CMD cp ../share/uImage* $D$RESCUE
 CMD cp ../share/linux.dtb $D$RESCUE/uboot.dtb
 CMD cp ../share/*.dtb $D$RESCUE/
 CMD cp ../share/splash.bmp.gz $D$RESCUE
@@ -103,6 +102,11 @@ CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.am.cmd $D/boot.scr
 ## cp or links
 CMD cp $D/boot.scr $D/boot.scr.uimg
 CMD cp $D/boot.scr $D/s905_autoscript
+
+CMD cp /tmp/uboot-aml/u-boot.spi.bin		$D$RESCUE/u-boot.vim2.mainline.spi.bin
+CMD cp /tmp/uboot-legacy-aml/u-boot.spi.bin 	$D$RESCUE/u-boot.vim2.legacy.spi.bin
+CMD cp /tmp/uboot-aml/u-boot.sd.bin 		$D$RESCUE/u-boot.vim2.mainline.sd.bin
+CMD cp /tmp/uboot-legacy-aml/u-boot.sd.bin	$D$RESCUE/u-boot.vim2.legacy.sd.bin
 
 CMD cp ../files/80_user_env.txt $D$RESCUE
 

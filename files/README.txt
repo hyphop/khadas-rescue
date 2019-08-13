@@ -1,8 +1,9 @@
-# files folder descriptions txt
+# files folder descriptions
 
-   
 + 80_user_env.txt          - user uboot env
++ boot.am.cmd              - uboot script boot rescue system from SD via default uboot
 + boot.dhcp.cmd            - uboot script boot rescue system from DHCP+TFTP
++ boot.dhcp.cmd.OLD        - uboot script boot rescue system from DHCP+TFTP
 + boot.sd.cmd              - uboot script boot rescue system from SD
 + boot.sd.make             - update boot.sd.scr from boot.sd.cmd source
 + boot.spi.cmd             - uboot script boot rescue system from spi flash

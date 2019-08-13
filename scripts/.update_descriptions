@@ -14,7 +14,10 @@ echo "# $(basename $PWD) folder descriptions
 for F in "$@"; do
 
 #    echo "[.] $F">&2
-    [ "$F" = "_" ] && echo "   "
+    [ "$F" = "_" ] && {
+    #    echo "   "
+	printf ""
+    }
 
     [ -f "$F" ] && {
 

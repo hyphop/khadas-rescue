@@ -42,19 +42,24 @@ echo $LOADER $LOGO_OFFHEX /rescue/splash.bmp.gz
 $LOADER $LOGO_OFFHEX /rescue/splash.bmp.gz
 bmp display $LOGO_OFFHEX 0 0
 
-#echo "load packed kernel"
-#echo $LOADER $UIMAGE_ADDR /rescue/uImage
-#$LOADER $UIMAGE_ADDR /rescue/uImage
+echo "load packed kernel"
+echo $LOADER $UIMAGE_ADDR /rescue/uImage
+$LOADER $UIMAGE_ADDR /rescue/uImage
 
 echo "load initrd"
 echo $LOADER $UINITRD_ADDR /rescue/uInitrd
 $LOADER $UINITRD_ADDR /rescue/uInitrd
+
 
 setenv bootargs ${cmdline} ${rescue_custom} booted=$BOOTED hwver=$hwver
 setenv bootargs ${bootargs} console=tty0 console=ttyAML0,115200n8 console=ttyS0,115200n8 no_console_suspend consoleblank=0
 setenv bootargs ${bootargs} vout=${outputmode},enable hdmitx=${cecconfig},${colorattribute}
 setenv bootargs ${bootargs} hdmimode=${hdmimode} cvbsmode=${cvbsmode} osd_reverse=${osd_reverse}
 setenv bootargs ${bootargs} video_reverse=${video_reverse} jtag=${jtag} reboot_mode=${reboot_mode} ddr_size=${ddr_size}
+
+echo "activate emmc before run"
+mmc dev 1
+mmc info
 
 ## RESCUE
 
@@ -64,18 +69,19 @@ echo "booti $IMAGE_ADDR $UINITRD_ADDR $DTB_ADDR"
 echo "[i] bootargs: $bootargs"
 echo "[i] bootcmd:  $bootcmd"
 
-echo "activate emmc before run"
-mmc dev 1
-
 echo "[i] sleep 1 sec Ctrl+C for break boot"
 sleep 1
 
-#bootm $UIMAGE_ADDR $UINITRD_ADDR 
-#echo opss
+bootm $UIMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
+
+echo oops
 
 echo "load raw kernel"
 echo $LOADER $IMAGE_ADDR /rescue/Image
 $LOADER $IMAGE_ADDR /rescue/Image
+
+mmc dev 1
+
 booti $IMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
 
 echo ooooopsss

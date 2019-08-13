@@ -1,6 +1,5 @@
-# dhcp folder descriptions md
+# dhcp folder descriptions
 
-   
 + [autoscript.make](autoscript.make) - mkimage wrapper for uboot auto script 
 + [dhcp.boot_os.cmd](dhcp.boot_os.cmd) - LIBREELEC RUN example
 + [dhcp.boot_os2.cmd](dhcp.boot_os2.cmd) - boot os script example
