@@ -1,0 +1,20 @@
+#!/bin/sh
+
+## hyphop ##
+
+[ "$F" ] || F="$1"
+[ "$F" ] || F=../share/config.gz
+
+case $F in
+    *.gz)
+    CAT="gzip -dc"
+    ;;
+    *)
+    CAT="cat"
+    ;;
+esac 
+
+echo "[i] check config $F">&2
+
+$CAT $F | egrep SQUASHFS=y\|OVERLAY_FS=y\|CONFIG_BLK_DEV_RAM=y\|CONFIG_BLK_DEV_RAM_SIZE=
+
