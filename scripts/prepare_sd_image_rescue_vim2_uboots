@@ -103,10 +103,14 @@ CMD mkimage -C none -A arm -T script -d $D$RESCUE/boot.am.cmd $D/boot.scr
 CMD cp $D/boot.scr $D/boot.scr.uimg
 CMD cp $D/boot.scr $D/s905_autoscript
 
-CMD cp /tmp/uboot-aml/u-boot.spi.bin		$D$RESCUE/u-boot.vim2.mainline.spi.bin
+[ -f /tmp/uboot-legacy-aml/u-boot.spi.bin ] && {
 CMD cp /tmp/uboot-legacy-aml/u-boot.spi.bin 	$D$RESCUE/u-boot.vim2.legacy.spi.bin
-CMD cp /tmp/uboot-aml/u-boot.sd.bin 		$D$RESCUE/u-boot.vim2.mainline.sd.bin
 CMD cp /tmp/uboot-legacy-aml/u-boot.sd.bin	$D$RESCUE/u-boot.vim2.legacy.sd.bin
+}
+[ -f /tmp/uboot-aml/u-boot.spi.bin ] && {
+CMD cp /tmp/uboot-aml/u-boot.spi.bin		$D$RESCUE/u-boot.vim2.mainline.spi.bin
+CMD cp /tmp/uboot-aml/u-boot.sd.bin 		$D$RESCUE/u-boot.vim2.mainline.sd.bin
+}
 
 CMD cp ../files/80_user_env.txt $D$RESCUE
 

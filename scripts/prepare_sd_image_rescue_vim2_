@@ -159,7 +159,7 @@ case $DEV in
     *@*)
     TO="root@${DEV#*@}"
     echo "[i] remote ssh write image $DD to sd: $DEV2">&2
-    CMD ssh $TO dd of=$DEV2 conv=sync bs=40960 < $DD
+    CMD ssh $TO dd of=$DEV2 conv=sync  < $DD
     echo "[i] DONE">&2
     exit
     ;;
