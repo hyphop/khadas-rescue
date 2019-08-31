@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -e
+
+## hyphop ##
+
+#= remote write
+
+DEV="$1"
+
+CMD(){
+    echo "[#] $@">&2
+    "$@"
+}
+
+### !!!! rebuild
+TO=vim2
+
+image=$1
+
+    [ -f "$image" ] || {
+	echo "[i] file '$image' not found">&2
+	exit 1
+    }
+
+    [ -f "$image" ] && {
+
+    echo "[i] remote ssh write image $image">&2
+    
+    image_name=$(basename $image)
+
+    CMD rsync -avL --inplace --progress $image root@$TO:/tmp && {
+echo "
+    /opt/sd_boot /tmp/$image_name
+" | ssh root@$TO
+
+    }
+
+    echo "[i] DONE">&2
+
+    }

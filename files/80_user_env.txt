@@ -2,15 +2,25 @@
 
 #= user uboot env
 
-#IMAGE_ADDR=0x00000000
-UIMAGE_ADDR=0x30000000
-UINITRD_ADDR=0x40000000
-DTB_ADDR=0x50000000
+  LINUX_ADDR=0x1080000
+  IMAGE_ADDR=0x1080000
 
-IMAGE_ADDR=1080000
+UINITRD_ADDR=0x8000000
+ UIMAGE_ADDR=0x6000000
+ INITRD_ADDR=0x3000000
 
+    DTB_ADDR=0x1000000
+dtb_mem_addr=0x1000000
 
-rescue_custom=passw=khadas\
+   LOGO_ADDR=0x30000000
+    ENV_ADDR=0x32000000
+   HOOK_ADDR=0x31000000
+ SCRIPT_ADDR=0x33000000
+ NETSCR_ADDR=0x34000000
+
+#passw=khadas\
+
+rescue_custom=\
 ap_ssid=Krescue\
 ap_passw=12345678\
 wifi_mode=2g\
@@ -18,10 +28,9 @@ script=sd:hello.sh\
 script=sd:sd2ram.sh\
 eth_hw=C0:4A:00:C0:3F:DB\
 
-
 #script=http://github.com/hyphop/khadas-rescue/rescue/scripts/hello.sh"
-
-cmdline=root=/dev/ram0 rw init=/init panic=10 net.ifnames=0 loglevel=3 fbcon=font:TER16x32
+#ramdisk_size=8192
+cmdline=root=/dev/ram0 rw init=/init.squashf panic=10 net.ifnames=0 loglevel=4 fbcon=font:TER16x32
 
 # mtd=mtdparts=W25q128-flash.0:512k(uboot),-@0(full)
 

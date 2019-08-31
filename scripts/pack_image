@@ -48,7 +48,10 @@ OUT=$UNI.spi.bin
 OUT_SPI="$S/image.spi.bin"
 
 # kernel run from there
-LINUX_ADDR=0x01080000
+
+INITRD_ADDR=0x3000000
+ LINUX_ADDR=0x1080000
+
 KERNEL_CMP=lzma
 KERNEL_CMP=gzip
 
@@ -58,7 +61,8 @@ BLOCK_SIZH=$((1024*32))
 SYS_ENV=$S/00_system_env.txt
 
 UBOOT_BIN=$S/u-boot.spi.bin
-UBOOT_SCRIPT=$S/*.cmd
+#UBOOT_SCRIPT=$S/*.cmd
+UBOOT_SCRIPT=$P/../files/rescue.cmd
 UBOOT_SCRIPT_ENV=$S/*env.txt
 UBOOT_LOGOS=$S/*.bmp.gz
 UBOOT_DTB=$S/*.dtb
@@ -135,7 +139,7 @@ UBOOT_BIN_SIZE=$(filesize $UBOOT_BIN) || exit 1
 
 
 ## prepare SCRIPT
-
+[ "" ] && {
 UBOOT_SCRIPT_TMP=$UNI.script.tmp
 UBOOT_SCRIPT_SCR=$UNI.script.scr
 UBOOT_SCRIPTS=0
@@ -153,12 +157,16 @@ done
 #CMD mkimage -C none -A arm -T script -d $UBOOT_SCRIPT_TMP $UBOOT_SCRIPT_SCR
 
 ln -sf $UBOOT_SCRIPT_TMP $UBOOT_SCRIPT_SCR
+}
 
+UBOOT_SCRIPT_SCR=$UBOOT_SCRIPT
 UBOOT_SCRIPT_SIZE=$(filesize $UBOOT_SCRIPT_SCR) || exit 1
 
+[ "" ] && {
 [ $UBOOT_SCRIPTS -lt 1 ] && {
     echo "[e] not found script in $UBOOT_SCRIPT">&2
     exit 1
+}
 }
 
 ## LOGOS
@@ -283,13 +291,14 @@ LINUX_INITRD_SIZE=$(filesize $LINUX_INITRD) || exit 1
     exit 1
 }
 
+
 CMPDATE $LINUX_INITRD $LINUX_U_INITRD && {
 CMD mkimage -A arm64 \
     -O linux \
     -T ramdisk \
     -C none \
-    -a 0x00000000 \
-    -e 0x00000000 \
+    -a $INITRD_ADDR \
+    -e $INITRD_ADDR \
     -n uInitrd \
     -d $LINUX_INITRD $LINUX_U_INITRD
 }
@@ -538,4 +547,3 @@ ls -l1L $OUT.gz
 echo "[i] image $OUT.gz - is ready">&2
 
 echo "[i] image $OUT_SPI -> $OUT - is ready">&2
-
