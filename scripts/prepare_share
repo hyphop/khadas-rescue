@@ -33,11 +33,11 @@ LN Initrd             ../../openwrt/initramfs-rescue.xz.squashfs
 LN linux.dtb          /tmp/modules/meson-g12b-a311d-khadas-vim3.dtb
 LN splash.bmp.gz.make ../files/splash.bmp.gz.make
 LN splash.svg         ../files/splash.svg
-LN u-boot.spi.bin     /tmp/uboot-legacy-aml/u-boot.sd.bin
-LN u-boot.sd.bin      /tmp/uboot-legacy-aml/u-boot.sd.bin
+#LN u-boot.spi.bin     /tmp/uboot-legacy-aml/u-boot.sd.bin
+#LN u-boot.sd.bin      /tmp/uboot-legacy-aml/u-boot.sd.bin
 
-LN rescue		.
-LN boot.scr		../files/boot.dhcp.cmd
+#LN rescue		.
+#LN boot.scr		../files/boot.dhcp.cmd
 
 #LN dhcp.upgrade_spi_flash.cmd_  	../scripts/dhcp/dhcp.upgrade_spi_flash.cmd
 #LN dhcp.upgrade_spi_flash.make  	../scripts/dhcp/autoscript.make

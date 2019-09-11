@@ -68,8 +68,8 @@ DD=$D.img
 
 OF=3276 ## 1.6M before
 
-S=$((42*1024*1024))
-S=$((52*1024*1024))
+S=$((36*1024*1024))
+#S=$((52*1024*1024))
 BS=512
 
 
@@ -96,7 +96,12 @@ CMD cp -L ../share/uInitrd* $D$RESCUE
 CMD cp -L ../share/uImage* $D$RESCUE
 CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/uboot.dtb
 #CMD cp -L ../share/linux.dtb $D$RESCUE/linux.dtb
-CMD cp -L ../share/*.dtb $D$RESCUE
+for f in ../share/*.dtb; do
+    [ -f "$f" ] && {
+	CMD cp -L $f $D$RESCUE
+    }
+done
+
 CMD cp -L ../share/splash.bmp.gz $D$RESCUE
 #CMD cp ../files/*_env.txt $D$RESCUE
 CMD cp -L ../share/*_env.txt $D$RESCUE
@@ -112,21 +117,27 @@ CMD cp $D$RESCUE/rescue.scr $D/boot.scr.uimg
 CMD cp $D$RESCUE/rescue.scr $D/boot.scr.uimg
 CMD cp $D$RESCUE/rescue.scr $D/s905_autoscript
 
-[ -f /tmp/uboot-legacy-aml/u-boot.spi.bin ] && {
-CMD cp /tmp/uboot-legacy-aml/u-boot.spi.bin 	$D$RESCUE/u-boot.vim2.legacy.spi.bin
-CMD cp /tmp/uboot-legacy-aml/u-boot.sd.bin	$D$RESCUE/u-boot.vim2.legacy.sd.bin
+
+for v in vim3 vim2 vim1; do
+for t in sd spi; do
+
+for s in /tmp ../bin; do
+
+U="$s/uboot_$v/u-boot.$t.bin"
+
+[ -f "$U" ] && {
+    CMD cp "$U" "$D$RESCUE/u-boot.$v.$t.bin"
+    break
 }
 
-[ "" ] && {
-[ -f /tmp/uboot-aml/u-boot.spi.bin ] && {
-CMD cp /tmp/uboot-aml/u-boot.spi.bin		$D$RESCUE/u-boot.vim2.mainline.spi.bin
-CMD cp /tmp/uboot-aml/u-boot.sd.bin 		$D$RESCUE/u-boot.vim2.mainline.sd.bin
-}
-}
+done
+done
+done
 
-[ -f /tmp/krescue.spi.bin ] && {
-CMD cp /tmp/krescue.spi.bin $D$RESCUE/
-}
+
+#[ -f /tmp/krescue.spi.bin ] && {
+#CMD cp /tmp/krescue.spi.bin $D$RESCUE/
+#}
 
 
 SS=$D$RESCUE/scripts

@@ -4,7 +4,19 @@
 
 #= tftp dhcp server + traffic forward
 
-RP=$(realpath $0); DP=$(dirname $RP); . $DP/conf/dhcp.conf
+#set -e 
+
+[ "$CONF" ] || CONF="$1"
+[ "$CONF" ] || CONF=conf/dhcp.conf
+
+[ -f "$CONF" ] || {
+    echo "[e] not found config file: $CONF">&2
+    exit 1
+}
+
+echo "[i] config $CONF">&2
+
+RP=$(realpath $0); DP=$(dirname $RP); . $DP/$CONF
 
 ## need a root privs
 for runas in $DP/bin/runas runas sudo; do

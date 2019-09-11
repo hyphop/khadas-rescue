@@ -19,6 +19,12 @@
     setenv CuImage  /rescue/uImage
     setenv CImage   /rescue/Image
 
+    setenv Cdtb     /rescue/krescue-vim2.dtb
+
+test "$hwver" = "VIM2.V14" && setenv Cdtb /rescue/krescue-vim2.dtb
+test "$hwver" = "VIM3.V10" && setenv Cdtb /rescue/krescue-vim3-s922x.dtb
+test "$hwver" = "VIM3.V11" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
+
 if test "$BOOT_HOOK" = ""; then
 if test "$BOOTED" = "spi"; then
 
@@ -37,9 +43,11 @@ fi
 
 if test "$BOOTED2" = "dhcp"; then
     setenv LOADER tftp
+    setenv Cenv   /rescue/80_user_env.txt
 fi
 
 echo "**KRESCUE LOAD by $LOADER FROM // $BOOTED+$BOOTED2 post: $BOOT_HOOK // $hwver**"
+
 
 ##############################################################
 
@@ -53,11 +61,15 @@ env import -t $ENV_ADDR $filesize || exit
 
 if test "$BOOT_HOOK" = ""; then
 if test "$BOOTED" = "spi"; then
+if test "$BOOTED2" != "dhcp"; then
+
     setenv Cdtb     $DTB_OFFHEX $DTB_SIZHEX
     setenv Csplash  $LOGO_OFFHEX $LOGO_SIZHEX
     setenv CuInitrd $UINITRD_OFFHEX $UINITRD_SIZHEX
     setenv CuImage  $UIMAGE_OFFHEX $UIMAGE_SIZHEX
     setenv CImage   $IMAGE_OFFHEX $IMAGE_SIZHEX
+
+fi
 fi
 fi
 
@@ -67,6 +79,8 @@ echo "load dtb"
 echo $LOADER $DTB_ADDR $Cdtb
 $LOADER $DTB_ADDR $Cdtb
 fdt addr $DTB_ADDR || exit 1
+#
+fdt set spifc status okay
 
 echo "load logo"
 echo $LOADER $LOGO_ADDR $Csplash
@@ -86,6 +100,8 @@ setenv bootargs "${bootargs} console=tty0 console=ttyAML0,115200n8 console=ttyS0
 setenv bootargs "${bootargs} vout=${outputmode},enable hdmitx=${cecconfig},${colorattribute}"
 setenv bootargs "${bootargs} hdmimode=${hdmimode} cvbsmode=${cvbsmode} osd_reverse=${osd_reverse}"
 setenv bootargs "${bootargs} video_reverse=${video_reverse} jtag=${jtag} reboot_mode=${reboot_mode} ddr_size=${ddr_size}"
+
+setenv bootargs "${bootargs} dtb=$Cdtb"
 
 #echo "activate emmc before run"
 #mmc dev 1
