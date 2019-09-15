@@ -32,5 +32,4 @@ eth_hw=C0:4A:00:C0:3F:DB\
 #ramdisk_size=8192
 cmdline=root=/dev/ram0 rw init=/init.squashf panic=10 net.ifnames=0 loglevel=4 fbcon=font:TER16x32
 
-# mtd=mtdparts=W25q128-flash.0:512k(uboot),-@0(full)
-
+# 

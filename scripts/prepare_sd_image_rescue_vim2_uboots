@@ -69,7 +69,7 @@ DD=$D.img
 OF=3276 ## 1.6M before
 
 S=$((36*1024*1024))
-#S=$((52*1024*1024))
+S=$((52*1024*1024))
 BS=512
 
 
@@ -113,6 +113,8 @@ CMD cp -L ../files/cmd2scr $D$RESCUE
 
 CMD cp $D$RESCUE/rescue.cmd $D$RESCUE/hook.cmd
 CMD cp $D$RESCUE/rescue.scr $D$RESCUE/hook.scr
+#//// need to ask about this
+CMD cp $D$RESCUE/rescue.cmd $D/boot.ini
 CMD cp $D$RESCUE/rescue.scr $D/boot.scr.uimg
 CMD cp $D$RESCUE/rescue.scr $D/boot.scr.uimg
 CMD cp $D$RESCUE/rescue.scr $D/s905_autoscript
@@ -135,9 +137,9 @@ done
 done
 
 
-#[ -f /tmp/krescue.spi.bin ] && {
-#CMD cp /tmp/krescue.spi.bin $D$RESCUE/
-#}
+[ -f /tmp/krescue.spi.bin ] && {
+CMD cp /tmp/krescue.spi.bin $D$RESCUE/
+}
 
 
 SS=$D$RESCUE/scripts
@@ -158,11 +160,14 @@ CMD sync
 
 CMD $sudo umount $D
 
+CMD $sudo fsck.fat $LOOP
 
 #CMD $sudo losetup -d $LOOP || {
 CMD $sudo losetup -D || {
     echo "[i] loop $LOOP still used">&2
 }
+
+md5sum $DD | tee $DD.md5sum
 
 echo "[i] rescue sd image: $DD is ready">&2
 

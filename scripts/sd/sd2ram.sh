@@ -9,7 +9,8 @@
 #  rescue_custom="... script=sd:test.sh"
 
 D=/tmp/sd
-SD=/dev/mmcblk?p1
+#SD=/dev/mmcblk?p1
+SD="$(mmcdisk sd)p1"
 
 MSG="[i] $0 copy $SD -> $D"
 

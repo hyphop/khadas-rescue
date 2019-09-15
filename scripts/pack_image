@@ -18,8 +18,13 @@ REBUILD_RESCUE=
 case "$@" in
     -r)
     REBUILD_RESCUE=1
+    
     ;;
 esac
+
+HEX(){
+    printf "0x%06X" "$1"
+}
 
 ## rebuild rescue image
 
@@ -34,9 +39,22 @@ cd $DIR
 }
 
 FLASH_SIZE=$((1024*1024*16))
+FLASH_SIZE_HEX=$(HEX $FLASH_SIZE)
 
-ENV_OFFSET=$((FLASH_SIZE-64*1024))
-ENV_OFFSET_HEX=$(printf %06X $ENV_OFFSET)
+ENV_SIZE=$((64*1024))
+ENV_SIZE_HEX=$(HEX $ENV_SIZE)
+
+ENV_OFFSET=$((FLASH_SIZE-$ENV_SIZE))
+ENV_OFFSET_HEX=$(HEX $ENV_OFFSET)
+
+echo "
+SPI FLASH
+=========
+0 $FLASH_SIZE_HEX
+
+$ENV_OFFSET_HEX $ENV_SIZE_HEX
+
+" >&2
 
 UNI=/tmp/krescue
 
@@ -46,6 +64,10 @@ NOCACHE=
 
 OUT=$UNI.spi.bin
 OUT_SPI="$S/image.spi.bin"
+SPI_PARTS_DTS="$S/spi_parts.dts"
+SPI_PARTS_CMD="$S/spi_parts.cmdline"
+SPI_PARTS_CMDLINE="mtdparts="
+
 
 # kernel run from there
 
@@ -117,9 +139,10 @@ filesize(){
 UBOOT_BIN_SIZE=
 
 for UBOOT_BIN in $UBOOT_BIN ""; do
-#    [ -L "$UBOOT_BIN" ] && {
-#	UBOOT_BIN=$(realpath $UBOOT_BIN)
-#    }
+    [ -L "$UBOOT_BIN" ] && {
+	UBOOT_BIN_R=$(realpath $UBOOT_BIN)
+	echo "[i] UBOOT: $UBOOT_BIN_R">&2
+    }
     [ -f "$UBOOT_BIN" ] && {
 	break
     }
@@ -240,7 +263,9 @@ LINUX_IMAGE_SIZE=$(filesize $LINUX_IMAGE) || exit 1
 
 CKERNEL=$UNI.Image.$KERNEL_CMP
 
-[ $NOCACHE ] && rm $CKERNEL
+[ $NOCACHE ] && {
+    rm $CKERNEL
+}
 
 KNAME=$(basename $CKERNEL)
 
@@ -326,9 +351,6 @@ PAD(){
     echo $s
 }
 
-HEX(){
-    printf "0x%06X" "$1"
-}
 
 TABLE_ROWS="|%08s|%08s|%08s|%08s|%08s|%04s|%-30s|\n"
 
@@ -337,6 +359,8 @@ HR(){
 --------------------------------------\
 --------------">&2
 }
+
+item=1
 
 FLINE(){
 
@@ -347,9 +371,11 @@ FLINE(){
 
     printf $TABLE_ROWS "$n" "$@" $(($2/$BLOCK_SIZH)) "$f"
 
+    size_h="$(HEX $2)"
+
 echo "#$n
 ${n}_SIZE=$1
-${n}_SIZHEX=$(HEX $2)
+${n}_SIZHEX=$size_h
 ${n}_SPAD=$2
 ${n}_OFFSET=$3
 ${n}_OFFHEX=$4
@@ -358,6 +384,20 @@ ${n}_OFFHEX=$4
     [ "$f" = "-" ] && {
 	return
     }
+
+#    [ "" ] && { 
+    echo "
+    $n@$item {
+        label = \"$n\";
+        reg = <$4 $size_h>;
+    };
+    " >> $SPI_PARTS_DTS
+
+    SPI_PARTS_CMDLINE="$SPI_PARTS_CMDLINE,$(($2/1024))k($n)"
+
+    item=$((item+1))
+
+#    }
 
     [ -f "$f" ] || {
 	echo "[e] not found $f">&2
@@ -374,6 +414,10 @@ ${n}_OFFHEX=$4
 	conv=notrunc of="$S/$n.PAD" 1>/dev/null 2>/dev/null
 
     }
+}
+
+[ "1" ] && {
+    rm $S/*.PAD
 }
 
 o=0
@@ -394,6 +438,30 @@ UINITRD_SIZE=$LINUX_U_INITRD_SIZE
 echo "# SYSTEM_ENV auto generated $(date)
 " > $SYS_ENV
 
+echo "
+
+//SPI FLASH PARTS
+
+&spiflash {
+
+    partitions {
+    compatible = \"fixed-partitions\";
+    #address-cells = <1>;
+    #size-cells = <1>;
+
+    full@0 {
+        label = \"full\";
+        reg = <0x000000 $FLASH_SIZE_HEX>;
+    };
+
+    ubootenv@0 {
+        label = \"ubootenv\";
+        reg = <$ENV_OFFSET_HEX $ENV_SIZE_HEX>;
+    };
+
+" > $SPI_PARTS_DTS
+
+SPI_PARTS_CMDLINE="$SPI_PARTS_CMDLINE:-0(full)"
 ## fix size
 
 UBOOT_BIN_SIZE=$((20*$BLOCK_SIZE)) ## 0x140000 size
@@ -497,12 +565,31 @@ FLINE "ENV" - $BLOCK_SIZE $BLOCK_SIZE \
 
 user_data_size=$((ENV_OFFSET-$o))
 
+
 echo "total bytes: $o free user_data ($user_data_size)">&2
 
 [ "$o" -gt "$ENV_OFFSET" ] && {
     echo "[i] oversize !!! $o > $ENV_OFFSET">&2
     exit 1 
 }
+
+USER_DATA_OFFSET_HEX=$(HEX $o)
+user_data_size_hex=$(HEX $user_data_size)
+
+## 
+echo "
+    USER@0 {
+        label = \"USER\";
+        reg = <$USER_DATA_OFFSET_HEX $user_data_size_hex>;
+    };
+
+    };
+};
+" >> $SPI_PARTS_DTS
+
+echo "$SPI_PARTS_CMDLINE" | tee  $SPI_PARTS_CMD
+##
+
 
 UBOOT_SCRIPT_ENV_TMP=$UNI.script.env.tmp
 
@@ -535,6 +622,7 @@ UINITRD.PAD; do
     cat $S/$s >> $OUT
 
 done
+
 
 ln -sf $OUT $OUT_SPI
 
