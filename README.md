@@ -6,11 +6,12 @@ https://github.com/hyphop/khadas-rescue
 
 ## status
 
-Experimental!!!, tested on VIM3 boards only!
+Experimental!!!, tested on VIM1 VIM2 VIM3
 
 ## features
 
 + fully located on SPI flash or on SD card
++ mainline linux kernel
 + all in ram
 + very fast just a 10 sec full boot time
 + flash disks frendly

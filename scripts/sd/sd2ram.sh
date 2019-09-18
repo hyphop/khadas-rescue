@@ -25,7 +25,7 @@ for sd in $SD; do
     ls -l1
     cp -a * $D
     cd ..
-    umount $D.mnt && rm $D.mnt
+    umount $D.mnt && rm -df $D.mnt
     break
     }
 done

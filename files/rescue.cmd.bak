@@ -21,9 +21,6 @@
 
     setenv Cdtb     /rescue/krescue-vim2.dtb
 
-test "$hwver" = "" && setenv Cdtb /rescue/krescue-vim1.dtb
-test "$hwver" = "VIM1.V12" && setenv Cdtb /rescue/krescue-vim1.dtb
-test "$hwver" = "VIM1.V13" && setenv Cdtb /rescue/krescue-vim1.dtb
 test "$hwver" = "VIM2.V14" && setenv Cdtb /rescue/krescue-vim2.dtb
 test "$hwver" = "VIM3.V10" && setenv Cdtb /rescue/krescue-vim3-s922x.dtb
 test "$hwver" = "VIM3.V11" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb

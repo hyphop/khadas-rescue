@@ -9,6 +9,13 @@ UINITRD_ADDR=0x8000000
  UIMAGE_ADDR=0x6000000
  INITRD_ADDR=0x3000000
 
+#kvim#rsvmem dump 
+#[rsvmem] reserved memory:
+#[rsvmem] bl31 reserved memory start: 0x05000000
+#[rsvmem] bl31 reserved memory size:  0x00300000
+#[rsvmem] bl32 reserved memory start: 0x00000000
+#[rsvmem] bl32 reserved memory size:  0x00000000
+
     DTB_ADDR=0x1000000
 dtb_mem_addr=0x1000000
 
@@ -30,6 +37,6 @@ eth_hw=C0:4A:00:C0:3F:DB\
 
 #script=http://github.com/hyphop/khadas-rescue/rescue/scripts/hello.sh"
 #ramdisk_size=8192
-cmdline=root=/dev/ram0 rw init=/init.squashf panic=10 net.ifnames=0 loglevel=4 fbcon=font:TER16x32
+cmdline=root=/dev/ram0 rw init=/init.squashf panic=10 net.ifnames=0 loglevel=4 fbcon=font:TER16x32 video=HDMI-A-1:1920x1080@60e
 
 # 

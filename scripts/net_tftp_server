@@ -9,7 +9,9 @@
 [ "$CONF" ] || CONF="$1"
 [ "$CONF" ] || CONF=conf/dhcp.conf
 
-shift
+[ "$1" ] && {
+    shift
+}
 
 [ -f "$CONF" ] || {
     echo "[e] not found config file: $CONF">&2
