@@ -6,7 +6,7 @@
 
 ## USAGE
 
-    ./git_add_commit_push [messages] [messages]
+#    ./git_add_commit_push [messages] [messages]
 
 
 msg="$@"
