@@ -16,10 +16,21 @@ REBUILD_RESCUE=
 
 DEV2=/dev/mmcblk1
 
+UBOOT_VER=
+
 for a in "$@"; do
 case $a in
     -r)
     REBUILD_RESCUE=1
+    ;;
+    -1)
+UBOOT_VER=1
+    ;;
+    -2)
+UBOOT_VER=2
+    ;;
+    -3)
+UBOOT_VER=3
     ;;
     *@*)
     DEV="$a"
@@ -56,6 +67,19 @@ CMD $sudo losetup -D
 
 UBOOT_SD=../share/u-boot.sd.bin
 UBOOT_SPI=../share/u-boot.spi.bin
+
+
+#u-boot.sd.bin
+#u-boot.vim1.sd.bin
+
+[ "$UBOOT_VER" ] && {
+
+    echo "[i] change uboot version to $UBOOT_VER">&2
+
+    CMD ln -sf u-boot.vim$UBOOT_VER.sd.bin $UBOOT_SD
+    CMD ln -sf u-boot.vim$UBOOT_VER.spi.bin $UBOOT_SPI
+
+}
 
 [ -f $UBOOT_SD ] || {
     echo "[e] not found $UBOOT_SD">&2

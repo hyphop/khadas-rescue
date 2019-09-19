@@ -8,6 +8,8 @@ fatload mmc 0 100000 s905_autoscript && autoscr 100000 || source 100000 # vim1 b
 fatload mmc 1 100000 s905_autoscript && autoscr 100000 || source 100000
 fatload mmc 2 100000 s905_autoscript && autoscr 100000 || source 100000
 
+fatload mmc 0:1 100000 s905_autoscript && autoscr 100000 || source 100000 # vim1 boot from sd
+
 ```
 
 ## android
