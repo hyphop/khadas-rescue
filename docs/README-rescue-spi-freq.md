@@ -1,7 +1,6 @@
-# krescue SPI flash freq
+# Krescue SPI flash freq
 
 w25q128 can work at 104Mhz
-
 
 ```
 time dd if=/dev/mtd0 bs=4096 of=/dev/null

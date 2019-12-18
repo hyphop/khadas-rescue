@@ -31,7 +31,7 @@ RDEV=/dev/$DEV
     exit 1 
 }
 
-grep -q "U-Boot " $UBOOT  || {
+grep -q "sd/emmc" $UBOOT  || {
     echo "[e] $UBOOT signature not found">&2
     exit 1 
 }
@@ -50,7 +50,7 @@ cat /sys/class/block/$DEV/device/name
 echo \"[i] wait 2 sec before write to $HOST:$RDEV\"
 sleep 2
 dd of=/dev/$DEV conv=fsync,notrunc bs=444 count=1 if=/tmp/$UNAME
-dd of=/dev/$DEV conv=fsync,notrunc bs=512 if=/tmp/$UNAME
+dd of=/dev/$DEV conv=fsync,notrunc bs=512 skip=1 seek=1 if=/tmp/$UNAME
 echo DONE
 " | ssh $HOST
 

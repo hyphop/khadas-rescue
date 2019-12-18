@@ -1,0 +1,78 @@
+root@Krescue:/# uname -a
+Linux Krescue 5.3.0-rc6 #1 SMP PREEMPT Tue Oct 15 16:27:18 MSK 2019 aarch64 GNU/Linux
+
+root@Krescue:/# lsmod
+brcmfmac              225280  0 
+brcmutil               16384  1 brcmfmac
+cfg80211              364544  1 brcmfmac
+dwmac_meson8b          16384  0 
+phylink                28672  1 stmmac
+rc_core                36864  3 meson_ir,ir_nec_decoder
+realtek                20480  1 
+stmmac                135168  2 dwmac_meson8b,stmmac_platform
+stmmac_platform        20480  1 dwmac_meson8b
+
+dwmac_meson8b          16384  0 
+phylink                28672  1 stmmac
+realtek                20480  0 
+stmmac                135168  2 dwmac_meson8b,stmmac_platform
+stmmac_platform        20480  1 dwmac_meson8b
+
+
+[   13.492612]  - /lib/modules/5.3.0-rc6
+[   13.620259] meson8b-dwmac c9410000.ethernet: PTP uses main clock
+[   13.620273] meson8b-dwmac c9410000.ethernet: no reset control found
+[   13.621289] meson8b-dwmac c9410000.ethernet: User ID: 0x11, Synopsys ID: 0x37
+[   13.621305] meson8b-dwmac c9410000.ethernet: 	DWMAC1000
+[   13.621311] meson8b-dwmac c9410000.ethernet: DMA HW capability register supported
+[   13.621317] meson8b-dwmac c9410000.ethernet: RX Checksum Offload Engine supported
+[   13.621322] meson8b-dwmac c9410000.ethernet: COE Type 2
+[   13.621326] meson8b-dwmac c9410000.ethernet: TX Checksum insertion supported
+[   13.621331] meson8b-dwmac c9410000.ethernet: Wake-Up On Lan supported
+[   13.621372] meson8b-dwmac c9410000.ethernet: Normal descriptors
+[   13.621377] meson8b-dwmac c9410000.ethernet: Ring mode enabled
+[   13.621381] meson8b-dwmac c9410000.ethernet: Enable RX Mitigation via HW Watchdog Timer
+[   13.621389] meson8b-dwmac c9410000.ethernet: device MAC address 02:4a:57:3a:e3:d3
+[   13.621591] libphy: stmmac: probed
+[   13.622622] meson8b-dwmac c9410000.ethernet eth0: no phy at addr -1
+[   13.622633] meson8b-dwmac c9410000.ethernet eth0: stmmac_open: Cannot attach to PHY (error: -19)
+[   13.622860] libphy: mdio_mux: probed
+[   13.633375] libphy: mdio_mux: probed
+[   13.636588] meson8b-dwmac c9410000.ethernet eth0: no phy at addr -1
+[   13.636602] meson8b-dwmac c9410000.ethernet eth0: stmmac_open: Cannot attach to PHY (error: -19)
+[   14.094427] xt_time: kernel timezone is -0000
+[   14.637151] meson8b-dwmac c9410000.ethernet eth0: PHY [0.2009087f:00] driver [RTL8211F Gigabit Ethernet]
+[   14.637164] meson8b-dwmac c9410000.ethernet eth0: phy: setting supported 00,00000000,000062ff advertising 00,00000000,000062ff
+[   14.648296] Mass Storage Function, version: 2009/09/11
+[   14.648310] LUN: removable file: (no medium)
+[   14.663714] LUN: removable file: (no medium)
+[   14.768550] meson8b-dwmac c9410000.ethernet eth0: No Safety Features support found
+[   14.768568] meson8b-dwmac c9410000.ethernet eth0: PTP not supported by HW
+[   14.768578] meson8b-dwmac c9410000.ethernet eth0: configuring for phy/rgmii link mode
+[   14.768592] meson8b-dwmac c9410000.ethernet eth0: phylink_mac_config: mode=phy/rgmii/Unknown/Unknown adv=00,00000000,000062ff pause=10 link=0 an=1
+[   14.769962] meson8b-dwmac c9410000.ethernet eth0: phy link down rgmii/Unknown/Unknown
+[   14.771769] cfg80211: Loading compiled-in X.509 certificates for regulatory database
+[   14.808334] cfg80211: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+[   14.845351] brcmutil: unknown parameter 'ap_mode' ignored
+[   14.857886] brcmfmac: unknown parameter 'ap_mode' ignored
+[   14.863402] brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac4356-sdio for chip BCM4356/2
+[   14.946727] platform regulatory.0: Direct firmware load for regulatory.db.p7s failed with error -2
+[   14.946742] cfg80211: loaded regulatory.db is malformed or signature is missing/invalid
+[   14.989419] brcmfmac mmc2:0001:1: Direct firmware load for brcm/brcmfmac4356-sdio.khadas,vim2.txt failed with error -2
+[   15.096680] brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac4356-sdio for chip BCM4356/2
+[   15.096808] brcmfmac: brcmf_c_process_clm_blob: no clm_blob available (err=-2), device may have limited channels available
+[   15.100789] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4356/2 wl0: May 14 2014 19:51:52 version 7.35.17 (r477908) FWID 01-2ed3ee81
+[   15.539207] LUN: removable file: (no medium)
+[   15.626505] using random self ethernet address
+[   15.626513] using random host ethernet address
+[   15.642797] usb0: HOST MAC 3a:1c:0b:8b:dd:ab
+[   15.642866] usb0: MAC 62:ef:11:22:11:22
+[   15.646130] dwc2 c9100000.usb: bound driver configfs-gadget
+[   15.846918] dwc2 c9100000.usb: new device is high-speed
+[   15.967120] dwc2 c9100000.usb: new device is high-speed
+[   16.032124] dwc2 c9100000.usb: new address 44
+[   16.053560] configfs-gadget gadget: high-speed config #1: c
+[   17.343330] meson8b-dwmac c9410000.ethernet eth0: phy link up rgmii/1Gbps/Full
+[   17.343350] meson8b-dwmac c9410000.ethernet eth0: phylink_mac_config: mode=phy/rgmii/1Gbps/Full adv=00,00000000,00000000 pause=0e link=1 an=0
+[   17.344528] meson8b-dwmac c9410000.ethernet eth0: Link is Up - 1Gbps/Full - flow control rx/tx
+

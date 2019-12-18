@@ -1,0 +1,4 @@
+## image2sd.sh
+
++ simple command line image writer to SD card
++ write zip | gz | xz | 7z packed images

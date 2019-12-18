@@ -1,4 +1,4 @@
-# krescue write uboot to eMMC flash
+# Krescue write uboot to eMMC flash
 
 ## examples
 

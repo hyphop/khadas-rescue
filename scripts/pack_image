@@ -87,7 +87,9 @@ UBOOT_BIN=$S/u-boot.spi.bin
 UBOOT_SCRIPT=$P/../files/rescue.cmd
 UBOOT_SCRIPT_ENV=$S/*env.txt
 UBOOT_LOGOS=$S/*.bmp.gz
-UBOOT_DTB=$S/*.dtb
+#UBOOT_DTB=$S/*.dtb
+UBOOT_DTB=$S/krescue-vim$UBOOT_VER.dtb
+
 LINUX_U_IMAGE=$S/uImage
 LINUX_U_INITRD=$S/uInitrd
 
@@ -222,11 +224,15 @@ UBOOT_LOGO_SIZE=$(filesize $UBOOT_LOGO) #|| exit 1
 
 ## DTB
 
+echo "[i] UBOOT DTB : $UBOOT_DTB">&2
+
 for UBOOT_DTB in $UBOOT_DTB "" ; do
     [ -f "$UBOOT_DTB" ] && {
 	break
     }
 done
+
+echo "[i] UBOOT DTB : $UBOOT_DTB">&2
 
 [ "$UBOOT_DTB" ] || {
     echo "[e] undefined UBOOT_DTB">&2
@@ -282,13 +288,14 @@ CMPDATE(){
 
 #[ -f $CKERNEL ] || {
 
-lzma -dc $CKERNEL >/dev/null || {
+#lzma -dc $CKERNEL >/dev/null || {
+[ -f $CKERNEL ] && \
     rm $CKERNEL
-}
+#}
 
     CMPDATE $LINUX_IMAGE $CKERNEL && {
 	echo "[i] compress kernel $LINUX_IMAGE">&2
-	CMD $KERNEL_CMP -c $LINUX_IMAGE > $CKERNEL
+	CMD $KERNEL_CMP -9 -c $LINUX_IMAGE > $CKERNEL
     }
 
 #}
@@ -570,7 +577,7 @@ echo "total bytes: $o free user_data ($user_data_size)">&2
 
 [ "$o" -gt "$ENV_OFFSET" ] && {
     echo "[i] oversize !!! $o > $ENV_OFFSET">&2
-    exit 1 
+    [ "$NO_CHK_OVERSIZE" ] || exit 1 
 }
 
 USER_DATA_OFFSET_HEX=$(HEX $o)

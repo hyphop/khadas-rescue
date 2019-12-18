@@ -1,0 +1,92 @@
+#!/bin/sh
+
+set -e
+
+## hyphop ##
+
+#= prerape rescue dir
+
+
+[ "$REBUILD_RESCUE" ] && {
+    #NOCACHE=1 
+    $(dirname $0)/pack_image -r
+}
+
+CMD(){
+    echo "[#] $@">&2
+    "$@"
+}
+
+D=/tmp/krescue.sd
+
+rm -rf $D/*
+
+grep $D /proc/mounts && CMD $sudo umount $D
+
+#CMD $sudo losetup -D
+
+[ -d $D ] || mkdir $D
+
+RESCUE=/rescue
+
+[ -d $D$RESCUE ] || mkdir -p $D$RESCUE
+[ -d $D$RESCUE/docs ] || mkdir -p $D$RESCUE/docs
+
+CMD cp -L ../docs/README-rescue.md $D$RESCUE
+CMD cp -L ../docs/README-rescue* $D$RESCUE/docs
+#CMD cp -L ../share/Image $D$RESCUE
+CMD cp -L ../share/uInitrd* $D$RESCUE
+CMD cp -L ../share/uImage* $D$RESCUE
+CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/uboot.dtb
+#CMD cp -L ../share/linux.dtb $D$RESCUE/linux.dtb
+for f in ../share/*.dtb; do
+    [ -f "$f" ] && {
+	CMD cp -L $f $D$RESCUE
+    }
+done
+
+CMD cp -L ../share/splash.bmp.gz $D$RESCUE
+#CMD cp ../files/*_env.txt $D$RESCUE
+CMD cp -L ../share/*_env.txt $D$RESCUE
+
+CMD cp -L ../files/rescue.cmd $D$RESCUE
+CMD cp -L ../files/cmd2scr $D$RESCUE
+
+../files/cmd2scr $D$RESCUE/rescue.cmd
+
+CMD cp $D$RESCUE/rescue.cmd $D$RESCUE/hook.cmd
+CMD cp $D$RESCUE/rescue.scr $D$RESCUE/hook.scr
+#//// need to ask about this
+#CMD cp $D$RESCUE/rescue.cmd $D/boot.ini
+#CMD cp $D$RESCUE/rescue.scr $D/boot.scr.uimg
+#CMD cp $D$RESCUE/rescue.scr $D/boot.scr.uimg
+#CMD cp $D$RESCUE/rescue.scr $D/s905_autoscript
+
+
+for v in vim3 vim2 vim1; do
+for t in sd spi; do
+
+for s in /tmp ../bin; do
+
+U="$s/uboot_$v/u-boot.$t.bin"
+
+[ -f "$U" ] && {
+    CMD cp "$U" "$D$RESCUE/u-boot.$v.$t.bin"
+    break
+}
+
+done
+done
+done
+
+
+SS=$D$RESCUE/scripts
+[ -d $SS ] || CMD mkdir -p $SS
+CMD cp ../scripts/sd/* $SS
+
+ls -l1 $D/* | tee $D$RESCUE/files.list
+
+#md5sum $D/$RESCUE/* > $D$RESCUE/files.md5sum
+
+echo "$(date)" > $D$RESCUE/generated.date
+

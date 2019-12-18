@@ -1,9 +1,1 @@
-#!/bin/sh
-
-## hyphop ##
-
-#= update boot.sd.scr from boot.sd.cmd source
-
-echo mkimage -C none -A arm -T script -d $1 ${1%.*}.scr
-mkimage -C none -A arm -T script -d $1 ${1%.*}.scr
-
+extra/cmd2scr

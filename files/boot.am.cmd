@@ -1,1 +1,1 @@
-cmd2scr
+extra/cmd2scr

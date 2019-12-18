@@ -1,4 +1,4 @@
-# krescue bootmode
+# Krescue bootmode
 
 we can change boot sequence to SPI flash or MMC via `bootmode` command
 

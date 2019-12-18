@@ -1,0 +1,50 @@
+#!/bin/sh
+
+set -e
+
+CMD(){
+    echo "[#] $@">&2
+    "$@"
+}
+
+K=/tmp/krescue.imgs
+
+rm -rf $K
+
+mkdir $K
+
+export NO_CHK_OVERSIZE=1
+
+cp ../docs/txt/*.txt $K
+
+TAR=1 ./prepare_sd_image_rescue_vim2_uboots -r -1
+#exit 1
+
+cp /tmp/krescue.sd.img $K/VIM1.krescue.sd.img
+gzip -c /tmp/krescue.sd.img > $K/VIM1.krescue.sd.img.gz
+./prepare_sd_image_rescue_vim2_uboots -2
+cp /tmp/krescue.sd.img $K/VIM2.krescue.sd.img
+gzip -c /tmp/krescue.sd.img > $K/VIM2.krescue.sd.img.gz
+./prepare_sd_image_rescue_vim2_uboots -3
+cp /tmp/krescue.sd.img $K/VIM3.krescue.sd.img
+gzip -c /tmp/krescue.sd.img > $K/VIM3.krescue.sd.img.gz
+./prepare_sd_image_rescue_vim2_uboots -3l
+cp /tmp/krescue.sd.img $K/VIM3L.krescue.sd.img
+gzip -c /tmp/krescue.sd.img > $K/VIM3L.krescue.sd.img.gz
+
+P=$PWD
+
+cd $K
+md5sum *.img > md5sum.txt
+
+zip VIM1.krescue.sd.zip VIM1.krescue.sd.img *.txt
+zip VIM2.krescue.sd.zip VIM2.krescue.sd.img *.txt
+zip VIM3.krescue.sd.zip VIM3.krescue.sd.img *.txt
+zip VIM3L.krescue.sd.zip VIM3L.krescue.sd.img *.txt
+
+rm *.img
+
+cd $P
+
+cp ../files/image2sd/* $K
+

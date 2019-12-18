@@ -2,15 +2,17 @@
 
 One universal rescue system for khadas vims boards.
 We try to make one simple alternative way for solve common users problems!
-https://github.com/hyphop/khadas-rescue
+
++ https://github.com/hyphop/khadas-rescue
++ https://forum.khadas.com/t/krescue-take-full-control-of-your-vim-device/5945
 
 ## status
 
-Experimental!!!, tested on VIM1 VIM2 VIM3
+tested on VIM1 VIM2 VIM3 VIM3L
 
 ## features
 
-+ fully located on SPI flash or on SD card
++ can fully located in SPI flash, same as in eMMC or SD card
 + mainline linux kernel
 + all in ram
 + very fast just a 10 sec full boot time
@@ -40,6 +42,7 @@ Experimental!!!, tested on VIM1 VIM2 VIM3
 
 ## releases - downloads images
 
++ https://dl.khadas.com/Firmware/Krescue/
 + https://github.com/hyphop/khadas-rescue/releases
 + https://github.com/hyphop/khadas-rescue/releases/tag/vim2
 + https://github.com/hyphop/khadas-rescue/releases/download/vim2/krescue.sd.img.gz - VIM2 sd card image
@@ -85,3 +88,4 @@ Experimental!!!, tested on VIM1 VIM2 VIM3
 
 + https://docs.khadas.com
 + https://github.com/khadas
++ https://forum.khadas.com/t/krescue-take-full-control-of-your-vim-device/5945

@@ -1,4 +1,5 @@
 !.gitignore
+work
 share/*
 bin/*
 scripts/bin/*

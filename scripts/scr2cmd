@@ -1,0 +1,22 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= uboot script unwrapper
+
+[ "$1" ] || {
+    echo "[e] undef src input">&2
+    exit 1
+}
+
+[ "$2" ] || {
+    echo "#!script
+"
+    dd if="$1" bs=72 skip=1
+    exit
+}
+
+echo "#!script
+" > "$2"
+dd if="$1" bs=72 skip=1 >>"$2" 2>/dev/null
+

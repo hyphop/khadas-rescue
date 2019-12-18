@@ -6,7 +6,7 @@
 
 #/ USAGE
 #  edit 80_user_env.txt file next line
-#  rescue_custom="... script=sd:test.sh"
+#  rescue_custom="... script=sd:sd2ram.sh"
 
 D=/tmp/sd
 #SD=/dev/mmcblk?p1
@@ -25,7 +25,7 @@ for sd in $SD; do
     ls -l1
     cp -a * $D
     cd ..
-    umount $D.mnt && rm -df $D.mnt
+    umount $D.mnt && rm -rf $D.mnt
     break
     }
 done

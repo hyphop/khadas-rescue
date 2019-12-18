@@ -6,64 +6,28 @@
 
 ## PREPARE
 
-    kbi hwver
-
-    echo "** KRESCUE START hwver: $hwver hostname: $hostname maxcpus: $maxcpus **"
-
     setenv ENV_ADDR 0x32000000
-    setenv Cenv     /rescue/80_user_env.txt
 
     test "X$devtype" = "X" && devtype=mmc
-
-## FIND rescue source if devnum undefined
-
-    echo "[i] scan rescue device"
-
-	for d in 0 1 2; do
-	    if test "X$devnum" = "X"; then
-	    echo "[i] scan rescue device $d test $devnum"
-	    fatload $devtype $d $ENV_ADDR $Cenv && setenv devnum $d
-	    fi
-	done
-
+    test "X$devnum" = "X" && devnum=0
     setenv LOADER "fatload $devtype $devnum"
 
-    echo "[i] rescue loaded $LOADED"
-
+    setenv Cenv     /rescue/80_user_env.txt
     setenv Cdtb     /rescue/linux.dtb
     setenv Csplash  /rescue/splash.bmp.gz
-    setenv Csplash2 /rescue/splash.bmp.2.gz
     setenv CuInitrd /rescue/uInitrd
     setenv CuImage  /rescue/uImage
     setenv CImage   /rescue/Image
-    setenv Cdtb     /rescue/krescue-vim.dtb
 
-if test "$hwver" = ""; then
-    echo "[w] hwver not defined"
-else 
-    test "$hwver" = "VIM1.V12" && setenv Cdtb /rescue/krescue-vim1.dtb
-    test "$hwver" = "VIM1.V13" && setenv Cdtb /rescue/krescue-vim1.dtb
-    test "$hwver" = "VIM1.V14" && setenv Cdtb /rescue/krescue-vim1.dtb
-    test "$hwver" = "VIM2.V12" && setenv Cdtb /rescue/krescue-vim2.dtb
-    test "$hwver" = "VIM2.V14" && setenv Cdtb /rescue/krescue-vim2.dtb
-    test "$hwver" = "VIM3.V10" && setenv Cdtb /rescue/krescue-vim3-s922x.dtb
-    test "$hwver" = "VIM3.V11" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
-fi
+    setenv Cdtb     /rescue/krescue-vim2.dtb
 
-if test "$maxcpus" = ""; then
-    echo "[w] maxcpus not defined"
-    test "$hostname" = "arm_gxbb" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
-    test "$hostname" = "KVIM3" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
-    test "$hostname" = "kVIM1" && setenv Cdtb /rescue/krescue-vim1.dtb
-else
-    test "$hwver" = "VIM3.V12" && test "$maxcpus" = "4" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
-    test "$maxcpus" = "6" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
-    test "$maxcpus" = "8" && setenv Cdtb /rescue/krescue-vim2.dtb
-fi
-
-if test "$Cdtb" = "/rescue/krescue-vim.dtb"; then
-    echo "[w] dtb not detected force use static: $Cdtb"
-fi
+test "$hwver" = "" && setenv Cdtb /rescue/krescue-vim1.dtb
+test "$hwver" = "VIM1.V12" && setenv Cdtb /rescue/krescue-vim1.dtb
+test "$hwver" = "VIM1.V13" && setenv Cdtb /rescue/krescue-vim1.dtb
+test "$hwver" = "VIM1.V14" && setenv Cdtb /rescue/krescue-vim1.dtb
+test "$hwver" = "VIM2.V14" && setenv Cdtb /rescue/krescue-vim2.dtb
+test "$hwver" = "VIM3.V10" && setenv Cdtb /rescue/krescue-vim3-s922x.dtb
+test "$hwver" = "VIM3.V11" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
 
 if test "$BOOT_HOOK" = ""; then
 if test "$BOOTED" = "spi"; then
@@ -86,19 +50,18 @@ if test "$BOOTED2" = "dhcp"; then
     setenv Cenv   /rescue/80_user_env.txt
 fi
 
-echo "**KRESCUE LOAD by $LOADER FROM // $BOOTED+$BOOTED2 post: $BOOT_HOOK // $hwver // ${hwver}**"
+echo "**KRESCUE LOAD by $LOADER FROM // $BOOTED+$BOOTED2 post: $BOOT_HOOK // $hwver**"
 
 
 ##############################################################
 
 echo "load env"
-echo "$LOADER $ENV_ADDR $Cenv"
+echo $LOADER $ENV_ADDR $Cenv
 
 setenv filesize $ENV_SIZHEX
 $LOADER $ENV_ADDR $Cenv || exit
 echo env import -t $ENV_ADDR $filesize
 env import -t $ENV_ADDR $filesize || exit
-
 
 if test "$BOOT_HOOK" = ""; then
 if test "$BOOTED" = "spi"; then
@@ -116,32 +79,17 @@ fi
 
 ##############################################################
 
-if test "$hwver" = "VIM3.V12"; then
-echo $LOADER $DTB_ADDR /rescue/kvim3l_linux.dtb
-$LOADER $DTB_ADDR /rescue/kvim3l_linux.dtb
-osd open
-fi
-
-echo "load logo"
-echo $LOADER $LOGO_ADDR $Csplash
-$LOADER $LOGO_ADDR $Csplash
-
-if bmp display $LOGO_ADDR 0 0; then 
-    echo "BMP OK"
-else
-    echo "BMP KO"
-    echo $LOADER $LOGO_ADDR $Csplash2
-    $LOADER $LOGO_ADDR $Csplash2
-    echo unzip $LOGO_ADDR $LOGO_ADDR2
-    unzip $LOGO_ADDR $LOGO_ADDR2
-fi
-
 echo "load dtb"
 echo $LOADER $DTB_ADDR $Cdtb
 $LOADER $DTB_ADDR $Cdtb
 fdt addr $DTB_ADDR || exit 1
 #
 fdt set spifc status okay
+
+echo "load logo"
+echo $LOADER $LOGO_ADDR $Csplash
+$LOADER $LOGO_ADDR $Csplash
+bmp display $LOGO_ADDR 0 0
 
 echo "load packed initrd"
 echo $LOADER $UNITRD_ADDR $CuInitrd
@@ -159,11 +107,6 @@ setenv bootargs "${bootargs} video_reverse=${video_reverse} jtag=${jtag} reboot_
 
 setenv bootargs "${bootargs} dtb=$Cdtb"
 
-#fdt addr ${dtb_mem_addr};
-#fdt resize 65536
-#fdt set /adc_keypad key_val <120>
-fdt rm /partitions;
-
 #echo "activate emmc before run"
 #mmc dev 1
 #mmc info
@@ -173,8 +116,8 @@ fdt rm /partitions;
 echo "[i] bootargs: $bootargs"
 echo "[i] bootcmd:  $bootcmd"
 
-echo "[i] sleep 2 sec Ctrl+C for break boot"
-sleep 2 || exit 1
+echo "[i] sleep 1 sec Ctrl+C for break boot"
+# sleep 1
 
 echo bootm $UIMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
 bootm $UIMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
