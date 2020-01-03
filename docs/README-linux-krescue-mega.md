@@ -48,16 +48,15 @@ plz use this method! if
 + u prefer to use another burning tool
 + u wish to save a current os build as a reusable image file
 
-+ first step - download and Write to image file
+first step  ! download and Write to image file
 
     curl -sfL dl.khadas.com/.mega | sh -s - VIM3L
 
-+ second step ! if u have previous command without any errors u can write this image file direct to SD or EMMC card
+second step ! if u have previous command without any errors u can write this image file direct to SD or EMMC card
 
     cat VIM3L.krescue.sd.mega.img > /dev/mmcblk2 && sync && reboot
 
-
-# NOTES
+# ADVANCED NOTES
 
 ## REMOUNT ROOTFS to RO
 
@@ -88,12 +87,12 @@ after installation complite u can start reboot command or reset by button
 
 if u have some problem to write mega image in one step plz use two steps
 
-+ write krescue system only to eMMC and reboot to krescue
+write krescue system only to eMMC and reboot to krescue
 
     curl -sfL dl.khadas.com/.mega | sh -s - VIM3L > /dev/mmcblk0
 
-+ Krescue system is save for direct write to emmc becouse stay in ram every time and not used any storage after start
-    now u can write installation images
+Krescue system is save for direct write to emmc becouse stay in ram every time 
+and not used any storage after start! now u can write installation images.
 
     curl -sfL dl.khadas.com/.mega | sh -s - VIM3L VIM3L.Android.Pie_V191130.emmc.kresq > /dev/mmcblk0
 
