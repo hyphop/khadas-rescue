@@ -8,6 +8,7 @@ D=$(dirname $0)
 N=$(basename $0)
 
 BOARD=${N#*_}
+BOARD=${BOARD%.sh}
 
 D=$(dirname $0)
 R=$(realpath $D)
@@ -30,6 +31,6 @@ echo "[i] auto detect mounted to >> $MN3 <<">&2
 
 echo "[i] krescue change sd boot to $BOARD">&2
 
-sh $D/uboot_write $D/../u-boot.$BOARD.sd.bin $MN3 || exit 1
+sh $D/uboot_write.sh $D/../u-boot.$BOARD.sd.bin $MN3 || exit 1
 
 echo "[i] OK bootable changed to $BOARD"

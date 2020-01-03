@@ -1,0 +1,1 @@
+6f25c861ba53a52f585dc138cdc6abe8  /tmp/krescue.sd.img.vfat

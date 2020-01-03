@@ -193,8 +193,7 @@ case "$IN" in
     *.zip)
     echo "[i] zip image mode">&2
     unzip -l "$IN" "*.img" || FAIL wrong zip
-
-    S=$(unzip -l "$IN" "*.img" | head -4 | tail -1 | grep ".img" || FAIL)
+    S=$(unzip -l "$IN" | grep ".img" | tail -1)
     S=$(echo $S)
     S=${S%% *}
 

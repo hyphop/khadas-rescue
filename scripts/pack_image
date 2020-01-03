@@ -11,6 +11,8 @@ USAGE pack_spi_image [-r|-h]
 
 P=$(dirname $0)
 
+mkimage=$P/mkimage2
+
 DIR=$PWD
 
 REBUILD_RESCUE=
@@ -301,7 +303,7 @@ CMPDATE(){
 #}
 
 CMPDATE $CKERNEL $LINUX_U_IMAGE && {
-CMD mkimage -A arm64 -O linux -C $KERNEL_CMP \
+CMD $mkimage -A arm64 -O linux -C $KERNEL_CMP \
 	-T kernel -a $LINUX_ADDR -e $LINUX_ADDR \
 	-n "$KNAME" -d $CKERNEL $LINUX_U_IMAGE || {
 	    echo "[e] error mkimage ">&2
@@ -325,7 +327,7 @@ LINUX_INITRD_SIZE=$(filesize $LINUX_INITRD) || exit 1
 
 
 CMPDATE $LINUX_INITRD $LINUX_U_INITRD && {
-CMD mkimage -A arm64 \
+CMD $mkimage -A arm64 \
     -O linux \
     -T ramdisk \
     -C none \
@@ -442,7 +444,8 @@ UIMAGE_SIZE=$LINUX_U_IMAGE_SIZE
 UINITRD_SIZE=$LINUX_U_INITRD_SIZE
 
 
-echo "# SYSTEM_ENV auto generated $(date)
+# $(date)
+echo "# SYSTEM_ENV auto generated
 " > $SYS_ENV
 
 echo "

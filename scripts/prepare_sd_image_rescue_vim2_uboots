@@ -1,16 +1,18 @@
 #!/bin/sh
 
-set -e
-
 ## hyphop ##
 
 #= prerape rescue image for sd/usb/mmc disk - vfat - uboots 
 
 ## usage ./prapare_sd_image_rescue [-r] [ /dev/FLASHDISK ] | [ @remote_host ]
 
+set -e
+
 DEV="$1"
 
 sudo=sudo
+
+mkimage=$(dirname $0)/mkimage2
 
 REBUILD_RESCUE=
 
@@ -32,7 +34,7 @@ UBOOT_VER=2
     -3)
 UBOOT_VER=3
     ;;
-    -3l)
+    -3l|-3L)
 UBOOT_VER=3l
     ;;
     *@*)
@@ -66,15 +68,16 @@ CMD(){
 }
 
 D=/tmp/krescue.sd
+D2=/tmp/krescue.sd.tmp
 
-grep $D /proc/mounts && CMD $sudo umount $D
-CMD $sudo losetup -D
+#grep $D /proc/mounts && CMD $sudo umount $D
+#CMD $sudo losetup -D
 
-[ -d $D ] || mkdir $D
+[ -d "$D" ] && rm -rf "$D"
+[ -d "$D" ] || mkdir -p "$D"
 
 UBOOT_SD=../share/u-boot.sd.bin
 UBOOT_SPI=../share/u-boot.spi.bin
-
 
 #u-boot.sd.bin
 #u-boot.vim1.sd.bin
@@ -99,41 +102,48 @@ DD=$D.img
 DDRN="$(dirname $D)/$DEVNAME.$(basename $D)"
 
 OF=3276 ## 1.6M before
+OF=3200 ## 1638400 bytes UBOOT AREA before $((512*32*100))
 
 S=$((36*1024*1024))
-S=$((52*1024*1024))
+#S=$((52*1024*1024))
+S=$((64*1024*1024))	# total 64M
 BS=512
 
-
-CMD dd if=/dev/zero count=$((S/$BS + $OF)) bs=$BS of=$DD
-CMD dd if=$UBOOT_SD bs=$BS conv=notrunc of=$DD
-sync
-printf "n\np\n1\n$OF\n\nw\nq\n" | fdisk $DD
-sync
-printf "t\n\ne\nw\nq\n" | fdisk $DD
-sync
-CMD dd if=$UBOOT_SD  bs=444 count=1 conv=notrunc of=$DD
-
-LOOP=$($sudo losetup -f)
-
-CMD $sudo losetup -o $((OF*$BS)) $LOOP $DD
-CMD $sudo mkfs.vfat -n rescue $LOOP
-CMD $sudo mount -o user,uid=$(id -u),gid=$(id -g) $LOOP $D
-
 RESCUE=/rescue
+[ -d $D$RESCUE ] || CMD mkdir -p  $D$RESCUE
+CMD mkdir -p  $D.tmp
 
-[ -d $D$RESCUE ] || mkdir -p $D$RESCUE
-[ -d $D$RESCUE/docs ] || mkdir -p $D$RESCUE/docs
+echo "$(TZ= date)" > $D.tmp/generated.date
+echo "$(TZ= date +%s )" > $D.tmp/generated.time
+DATE=$(cat $D.tmp/generated.date)
+TIME=$(cat $D.tmp/generated.time)
+
+#grep  --binary-files=text KRESCUE_INFO -A3 krescue.sd.img
+
+#grep  --binary-files=text KRESCUE_INFO -A20 krescue.sd.img | grep --binary-files=text -B20 KRESCUE-INFO
+
+
+## copy files 
+
+[ -d $D$RESCUE/docs ] || CMD mkdir -p  $D$RESCUE/docs
 
 CMD cp -L ../docs/README-rescue.md $D
 CMD cp -L ../docs/README-rescue* $D$RESCUE/docs
 #CMD cp -L ../share/Image $D$RESCUE
 CMD cp -L ../share/uInitrd* $D$RESCUE
 CMD cp -L ../share/uImage* $D$RESCUE
-CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/uboot.dtb
-CMD cp -L ../share/*_linux.dtb $D$RESCUE
+#CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/uboot.dtb
+#CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/uboot.dtb
+#CMD cp -L ../share/*_linux.dtb $D$RESCUE
 #CMD cp -L ../share/linux.dtb $D$RESCUE/linux.dtb
-for f in ../share/*.dtb; do
+CMD cp -L ../share/kvim_linux.dtb $D$RESCUE/vim1.dtb
+CMD cp -L ../share/kvim2_linux.dtb $D$RESCUE/vim2.dtb
+CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3.dtb
+CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3-a311d.dtb
+CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3-s922x.dtb
+CMD cp -L ../share/kvim3l_linux.dtb $D$RESCUE/vim3-s905d3.dtb
+
+for f in ../share/krescue-*.dtb; do
     [ -f "$f" ] && {
 	CMD cp -L $f $D$RESCUE
     }
@@ -147,7 +157,8 @@ CMD cp -L ../share/*_env.txt $D$RESCUE
 CMD cp -L ../files/rescue.cmd $D$RESCUE
 CMD cp -Lr ../files/extra $D$RESCUE
 
-../files/extra/cmd2scr $D$RESCUE/rescue.cmd
+#../files/extra/cmd2scr.sh $D$RESCUE/rescue.cmd
+CMD $mkimage -C none -A arm -T script -d $D$RESCUE/rescue.cmd $D$RESCUE/rescue.scr
 
 cat ../files/boot.ini ../files/rescue.cmd >> $D/boot.ini
 
@@ -159,12 +170,15 @@ CMD cp $D$RESCUE/rescue.scr $D/s905_autoscript
 CMD cp $D$RESCUE/rescue.scr $D/aml_autoscript
 CMD cp $D$RESCUE/rescue.scr $D/cfgload		# coreelec
 
+CMD cp ../share/openwrt_khadas_fw_vims.tar.xz $D$RESCUE
+
 for v in vim3 vim3l vim2 vim1; do
 for t in sd spi; do
 
 for s in /tmp ../bin; do
 
 U="$s/uboot_$v/u-boot.$t.bin"
+
 
 [ -f "$U" ] && {
     CMD cp "$U" "$D$RESCUE/u-boot.$v.$t.bin"
@@ -187,29 +201,112 @@ SS=$D$RESCUE/scripts
 [ -d $SS ] || CMD mkdir -p $SS
 CMD cp ../scripts/sd/* $SS
 
+### OFFSET SIZE TOTAL
+PART_="${OF} $((S/$BS - $OF)) $((S/$BS))"
+echo "$PART_" > $D$RESCUE/generated.part
+
 PPP=$PWD
 cd $D
-rsync -ra . > /tmp/files.list
-md5deep -rsl . > /tmp/files.md5sum
+rsync -ra . > $D.tmp/files.list
+#rsync -ra . | tail -n+2 $D.tmp/files.list
+find  -type f -exec md5sum {} \; > $D.tmp/files.md5sum
 cd $PPP
-tail -n +2 /tmp/files.list > $D$RESCUE/files.list
-mv /tmp/files.md5sum $D$RESCUE/files.md5sum
-echo "$(date)" > $D$RESCUE/generated.date
+cp $D.tmp/files.* $D$RESCUE
+echo "# grep ./ /tmp/files.md5sum | sort -d | md5sum | head -c32">&2
+#grep ./ /boot/rescue/files.md5sum | sort -d | md5sum
+HASH=$(grep ./ /tmp/files.md5sum | sort -d | md5sum | head -c32 | tee $D.tmp/generated.hash)
+#sed -i "s/$HASH/hash: $(cat $D.tmp/generated.hash)/" $DD.vfat
+
+mv $D.tmp/generated.* $D$RESCUE
+
+#HASH="hash: --------------------------------"
+
+(
+printf "\n##KRESCUE_INFO\n"
+echo "hash: $HASH"
+echo "date: $DATE"
+echo "time: $TIME"
+echo "size: $S"
+echo "part: $PART_"
+echo "builder: hyphop"
+printf "\n##KRESCUE-INFO\n"
+) > $DD.msg
+
+CMD dd if=/dev/zero bs=$BS count=$((S/$BS - $OF)) of=$DD.vfat
+CMD mkfs.vfat -n rescue -i DEADBEEF -m $DD.msg $DD.vfat
+CMD mdir -i $DD.vfat ::
+
+PPPP=$PWD
+cd $D
+CMD mcopy -sp -i $DD.vfat $(ls --group-directories-first .) ::
+CMD mdir -i $DD.vfat -/ ::
+cd $PPPP
 
 CMD sync
 
-[ "$TAR" ] && {
-    CMD tar -czf $D.tar.gz -C$D .
-}
+#[ "$TAR" ] && {
+#    CMD tar -czf $D.tar.gz -C$D .
 
-CMD $sudo umount $D
+META="$HASH-$TIME-$S-"
 
-CMD $sudo fsck.fat $LOOP
+T="${D%.sd}-$META.sd.tar"
 
-#CMD $sudo losetup -d $LOOP || {
-CMD $sudo losetup -D || {
-    echo "[i] loop $LOOP still used">&2
-}
+echo "[T] $T"
+
+case $TAR in
+    1|gz)
+#    tar -cf- -C$D . | gzip -c -9 > $D.tar.gz
+    CMD tar -cf "$T" -C$D .
+    CMD gzip -9 "$T"
+    [ -f "$T" ] && rm "$T"
+    CMD mv "$T.gz" "$D.tar.gz"
+    ;;
+    xz)
+    CMD tar -cf "$T" -C$D .
+    CMD xz -9 "$T"
+    [ -f "$T" ] && rm "$T"
+    CMD mv "$T.xz" "$D.tar.xz"
+    ;;
+    zstd)
+    ./zstd_header2 "$(basename $T)
+$(cat $DD.msg)
+" > $D.UPDATE
+    tar -cf- -C$D . | zstd -18 -T0 >> $D.UPDATE
+
+./zstd_header2 "
+##KRESCUE##END
+" >> $D.UPDATE
+
+    ;;
+    sfs)
+    [ -f $D.sfs ] && rm $D.sfs
+    mksquashfs $D $D.sfs -comp gzip -b 1M
+    ;;
+    sfs2)
+    [ -f $D.sfs ] && rm $D.sfs
+    mksquashfs $D $D.sfs -comp zstd -b 1M -Xcompression-level 22
+    ;;
+    "")
+    ;;
+    *)
+    echo "[e] undef tar compress">&2
+    exit 1
+    ;;
+esac
+#}
+
+CMD fsck.fat $DD.vfat
+
+CMD dd if=/dev/zero count=$OF bs=$BS of=$DD
+CMD dd if=$UBOOT_SD bs=$BS conv=notrunc of=$DD
+cat $DD.vfat >> $DD
+sync
+echo "label:dos" | sfdisk -q $DD
+echo "$OF, " | sfdisk -q $DD -a
+sfdisk --part-type $DD 1 e
+sync
+
+#CMD dd if=$UBOOT_SD  bs=444 count=1 conv=notrunc of=$DD
 
 md5sum $DD | tee $DD.md5sum
 
@@ -269,3 +366,4 @@ echo "./image2flash /tmp/krescue.upgrade.disk.img /dev/#your_drive " >&2
 echo "# or remote write to sd">&2
 echo "ssh root@vimu dd of=/dev/mmcblk1 bs=4096 < /tmp/krescue.spi.bin">&2
 
+echo "[i] DONE">&2

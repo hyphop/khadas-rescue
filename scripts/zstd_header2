@@ -1,0 +1,30 @@
+#!/bin/bash
+
+## hyphop ##
+
+#=  zstd image header
+#=  zstd image tail
+#= kresq image tail
+
+MSG="$1"
+hdr_sz=${#MSG}
+hdr_sx=$(printf "%08x" ${#MSG})
+
+#echo "$hdr_sx">&2
+
+#########
+#01234567
+#########
+
+h1=${hdr_sx:6:2}
+h2=${hdr_sx:4:2}
+h3=${hdr_sx:2:2}
+h4=${hdr_sx:0:2}
+
+#echo "\x$h1\x$h2\x$h3\x$h4">&2
+
+(
+printf "%b" '\x50\x2A\x4D\x18'
+printf "%b" "\x$h1\x$h2\x$h3\x$h4"
+printf "$MSG"
+)

@@ -1,5 +1,9 @@
 #!/bin/sh
 
+## hyphop ##
+
+#= build vim krescue images
+
 set -e
 
 CMD(){
@@ -17,34 +21,125 @@ export NO_CHK_OVERSIZE=1
 
 cp ../docs/txt/*.txt $K
 
-TAR=1 ./prepare_sd_image_rescue_vim2_uboots -r -1
-#exit 1
+TAR=zstd ./prepare_sd_image_rescue_vim2_uboots -r -1
 
-cp /tmp/krescue.sd.img $K/VIM1.krescue.sd.img
-gzip -c /tmp/krescue.sd.img > $K/VIM1.krescue.sd.img.gz
-./prepare_sd_image_rescue_vim2_uboots -2
-cp /tmp/krescue.sd.img $K/VIM2.krescue.sd.img
-gzip -c /tmp/krescue.sd.img > $K/VIM2.krescue.sd.img.gz
-./prepare_sd_image_rescue_vim2_uboots -3
-cp /tmp/krescue.sd.img $K/VIM3.krescue.sd.img
-gzip -c /tmp/krescue.sd.img > $K/VIM3.krescue.sd.img.gz
-./prepare_sd_image_rescue_vim2_uboots -3l
-cp /tmp/krescue.sd.img $K/VIM3L.krescue.sd.img
-gzip -c /tmp/krescue.sd.img > $K/VIM3L.krescue.sd.img.gz
+S=/tmp/krescue.sd
+T=$S.img
+TL=$T.log
+
+CMD cp $T $K/VIM1.krescue.sd.img
+
+OF=$(sfdisk --dump $T| tail -1)
+
+START=${OF#*start= }
+START=$(echo ${START%%, *})
+
+[ "$START" ] || {
+    echo "[e] not found start offset">&2
+    exit 1
+}
+
+echo "[i] START: $START"
+
+for n in 2 3 3L; do
+    T2=$K/VIM$n.krescue.sd.img
+    cp $T $T2
+
+    case $n in
+	2)
+	UBOOT_SD=../share/u-boot.vim2.sd.bin
+	;;
+	3)
+	UBOOT_SD=../share/u-boot.vim3.sd.bin
+	;;
+	3L)
+	UBOOT_SD=../share/u-boot.vim3l.sd.bin
+	;;
+    esac
+    CMD dd if=/dev/zero bs=512 seek=1 count=$((START-1)) conv=notrunc of=$T2 2>$TL
+    CMD dd if=$UBOOT_SD bs=512 skip=1 seek=1 conv=notrunc of=$T2 2>$TL
+    CMD dd if=$UBOOT_SD bs=444 count=1 conv=notrunc of=$T2 2>$TL
+
+done
 
 P=$PWD
 
+
+DATE=$(cat $S/rescue/generated.date)
+HASH=$(cat $S/rescue/generated.hash)
+TIME=$(cat $S/rescue/generated.time)
+SIZE=$(stat -c%s $T)
+
+#META="hash:$HASH time:$TIME size:$SIZE date:$DATE">&2
+
+cp $S/rescue/generated.* $K
+
 cd $K
-md5sum *.img > md5sum.txt
 
-zip VIM1.krescue.sd.zip VIM1.krescue.sd.img *.txt
-zip VIM2.krescue.sd.zip VIM2.krescue.sd.img *.txt
-zip VIM3.krescue.sd.zip VIM3.krescue.sd.img *.txt
-zip VIM3L.krescue.sd.zip VIM3L.krescue.sd.img *.txt
+[ "OK" ] && {
 
-rm *.img
+for t in *.img; do
+    md5sum $t > md5sum.txt
+    MD5="$(egrep -o ^.{32} md5sum.txt)"
+    META="${t%.sd.img}-$HASH-$TIME-$SIZE-$MD5.sd.img"
+    echo "[i] META $META"
+    sfdisk --dump $t| tail -1
+    zip -9 ${t%.img}.zip $t *.txt generated.*
+    (
+    printf "\n##KRESCUE_INFO\n"
+    echo "HASH: $HASH"
+    echo "TIME: $TIME"
+    echo "SIZE: $SIZE"
+    echo "DATE: $DATE"
+    echo "BUILDER: hyphop"
+    echo "BORD: ${t%%.*}"
+    echo "IMAGE: $t"
+    echo "MD5SUM: $MD5"
+    echo "LINK: https://dl.khadas.com/Firmware/Krescue/"
+    printf "\n##KRESCUE-INFO\n"
+    ) | zip -z ${t%.img}.zip
+    mv $t $META
+    pigz -9 $META
+    mv $META.gz $t.gz
+done
+
+}
 
 cd $P
 
+for f in $S.tar.*;do 
+    [ -f "$f" ] && \
+    CMD mv $f $K
+done
+
+CMD mv $S.UPDATE $K
+
+t="$S.img.vfat"
+SIZE=$(stat -c%s $t)
+md5sum $t > md5sum.txt
+MD5="$(egrep -o ^.{32} md5sum.txt)"
+
+META="${S%.sd}-$HASH-$TIME-$SIZE-$MD5.sd.img.vfat"
+
+#CMD mv $t $META
+#CMD pigz -9 $META
+#CMD mv $META.gz $t.gz
+#CMD mv $t.gz $K
+
+./zstd_header2 "$(basename $META)
+$(cat $S.img.msg)
+" > $t.zst
+cat $t | zstd -18 -T0 >> $t.zst
+./zstd_header2 "
+##KRESCUE##END
+" >> $t.zst
+
+rm $t
+mv $t.zst $K
+
+rm $K/md5*
+
 cp ../files/image2sd/* $K
+
+echo "[i] DONE">&2
 

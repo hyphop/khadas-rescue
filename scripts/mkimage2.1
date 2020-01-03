@@ -1,0 +1,49 @@
+#!/bin/bash
+
+## hyphop ##
+
+#= mkimage wrapper
+#= zero time recalc crc32
+
+OUT=
+for v in $@; do
+    OUT=$v
+done
+
+echo "[i] MKIMAGE OUT: $OUT">&2
+
+mkimage $@ || exit 1
+
+## replace crc32 and time
+dd if=/dev/zero bs=4 seek=1 count=2 conv=fsync,notrunc of=$OUT 2>/dev/null
+#
+#CRC=$(dd if=$OUT bs=64 count=1 2>/dev/null | gzip -c | tail -c8 | hexdump -n4 -e '"%X"')
+#h1=${CRC:6:2}
+#h2=${CRC:4:2}
+#h3=${CRC:2:2}
+#h4=${CRC:0:2}
+#echo "[i] MKIMAGE CRC $CRC == $h1$h2$h3$h4">&2
+#printf "%b" "\x$h4\x$h3\x$h2\x$h1" | dd bs=4 seek=1 count=1 conv=fsync,notrunc of=$OUT 2>/dev/null
+
+dd if=$OUT bs=64 count=1 2>/dev/null | \
+    gzip -1 -c | tail -c8 | head -c4 | \
+    dd bs=4 seek=1 count=1 conv=fsync,notrunc of=$OUT
+
+exit 0
+
+#64=32+32
+
+#typedef struct image_header {
+#    uint32_t	ih_magic;	/* Image Header Magic Number	*/
+#    uint32_t	ih_hcrc;	/* Image Header CRC Checksum	*/
+#    uint32_t	ih_time;	/* Image Creation Timestamp	*/
+#    uint32_t	ih_size;	/* Image Data Size		*/
+#    uint32_t	ih_load;	/* Data	 Load  Address		*/
+#    uint32_t	ih_ep;		/* Entry Point Address		*/
+#    uint32_t	ih_dcrc;	/* Image Data CRC Checksum	*/
+#    uint8_t		ih_os;		/* Operating System		*/
+#    uint8_t		ih_arch;	/* CPU architecture		*/
+#    uint8_t		ih_type;	/* Image Type			*/
+#    uint8_t		ih_comp;	/* Compression Type		*/
+#    uint8_t		ih_name[IH_NMLEN];	/* Image Name		*/
+#} image_header_t;

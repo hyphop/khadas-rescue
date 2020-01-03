@@ -1,0 +1,43 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= crc32 from string | stdin | file
+
+# USAGE
+
+#   ./crc32 [STRING|FILE] < [STDIN]
+
+# EXAMPLES
+
+# printf 1234 | ./crc32
+#
+# > 9BE3E0A3
+#
+# ./crc32
+#
+# ./crc32 "1234"
+#
+# > 9BE3E0A3
+#
+# printf 1234 > /tmp/1234
+#
+# ./crc32 /tmp/1234
+#
+# > 9BE3E0A3
+
+[ "$1" ] || {
+# echo "[i] STDIN">&2
+    gzip -1 -c - | tail -c8 | hexdump -n4 -e '"%X"'
+    exit
+}
+
+[ -f "$1" ] && {
+# echo "[i] from FILE: $1">&2
+    cat "$1" | gzip -1 -c | tail -c8 | hexdump -n4 -e '"%X"'
+    exit
+}
+
+#echo "[i] from STRING: $1">&2
+printf "$1" | gzip -1 -c | tail -c8 | hexdump -n4 -e '"%X"'
+
