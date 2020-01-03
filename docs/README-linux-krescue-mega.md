@@ -56,15 +56,14 @@ second step ! if u have previous command without any errors u can write this ima
 
     cat VIM3L.krescue.sd.mega.img > /dev/mmcblk2 && sync && reboot
 
-# ADVANCED NOTES
+# ADVANCED NOTES !!!
 
 ## REMOUNT ROOTFS to RO
 
 before write to emmc u need remount rootfs to RO - read only mode
 this command make some warranty for correctly writing data
-some system like ubuntu need this command before write image
 
-    # goto single user rescue mode - its more safe for emmc write
+    # goto single user rescue mode - its more safe for emmc write (debian | ubuntu)
     systemctl rescue
 
     # try remount to RO
