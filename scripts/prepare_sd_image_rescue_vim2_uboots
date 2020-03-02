@@ -172,14 +172,11 @@ CMD cp $D$RESCUE/rescue.scr $D/cfgload		# coreelec
 
 CMD cp ../share/openwrt_khadas_fw_vims.tar.xz $D$RESCUE
 
+[ "" ] && {
 for v in vim3 vim3l vim2 vim1; do
 for t in sd spi; do
-
 for s in /tmp ../bin; do
-
 U="$s/uboot_$v/u-boot.$t.bin"
-
-
 [ -f "$U" ] && {
     CMD cp "$U" "$D$RESCUE/u-boot.$v.$t.bin"
     break
@@ -188,6 +185,30 @@ U="$s/uboot_$v/u-boot.$t.bin"
 done
 done
 done
+
+}
+
+[ "1" ] && {
+for v in VIM3 VIM3L VIM2 VIM1; do
+for t in sd.bin spi.bin bin.gz; do
+for s in /tmp ../bin; do
+U="$s/uboot_vims/u-boot.$v.$t"
+[ -f "$U" ] && {
+    case $U in
+	*gz)
+	gzip -dc "$U" > "$D$RESCUE/u-boot.$v.bin"
+	;;
+	*)
+	CMD cp "$U" "$D$RESCUE"
+	;;
+    esac
+    break
+}
+
+done
+done
+done
+}
 
 SPI_IMG=
 
@@ -271,7 +292,8 @@ case $TAR in
     ./zstd_header2 "$(basename $T)
 $(cat $DD.msg)
 " > $D.UPDATE
-    tar -cf- -C$D . | zstd -18 -T0 >> $D.UPDATE
+    tar -cf- -C$D . | zstd --ultra -22 -T0 >> $D.UPDATE
+#   tar -cf- -C$D . | zstd -18 -T0 >> $D.UPDATE
 
 ./zstd_header2 "
 ##KRESCUE##END

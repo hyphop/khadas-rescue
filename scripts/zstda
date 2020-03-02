@@ -1,0 +1,110 @@
+#!/bin/bash
+
+## hyphop ##
+
+#= ZSTD advanced
+
+ZSTDA="
+ _________ _____ ____    _    
+|__  / ___|_   _|  _ \  / \   
+  / /\___ \ | | | | | |/ _ \  
+ / /_ ___) || | | |_| / ___ \ 
+/____|____/ |_| |____/_/   \_\
+
+"
+
+#+ zstd image header
+#+ 4096 block size padding
+#+ zstd image tail
+
+ZSTD_HDR(){
+hdr_sz=$1
+hdr_sx=$(printf "%08x" $1)
+
+#########
+#01234567
+#########
+
+h1=${hdr_sx:6:2}
+h2=${hdr_sx:4:2}
+h3=${hdr_sx:2:2}
+h4=${hdr_sx:0:2}
+
+printf "%b" '\x50\x2A\x4D\x18'
+printf "%b" "\x$h1\x$h2\x$h3\x$h4"
+
+}
+
+MARK_INFO_BEGIN="
+##ZSTD_INFO
+"
+MARK_INFO_END="
+##ZSTD-INFO
+"
+MARK_FILE_END="
+##ZSTD#END
+"
+
+BS=4096
+ZSTD_HDR_SIZE=8
+
+IN=$1
+
+[ "$IN" ] || {
+    echo "[w] undef input file">&2
+    exit 1
+}
+
+OUT=$2
+
+CMP="--ultra -22"
+
+[ "$OUT" ] || OUT="$IN.zstd"
+
+BH=$((BS-$ZSTD_HDR_SIZE))
+ZSTD_HDR $BH > $OUT
+
+printf "%${BH}s" " " >> $OUT
+
+xxhsum="xxhsum -C2"
+
+(
+zstd -T0 -c $CMP $IN
+
+#exit 0
+
+S=$(stat -L -c%s $IN)
+S0=$(stat -L -c%s $OUT)
+S0=$((S0-$BS))
+S1=$((S0/$BS*$BS))
+[ "$S1" = "$S0" ] || S1=$((S1+$BS))
+S3=$((S1-$S0-$ZSTD_HDR_SIZE))
+SM=${#MARK_FILE_END}
+
+[ "$S3" -lt "$SM" ] && {
+    S3=$((S3+$BS))
+}
+
+S4=$((S3-$SM))
+
+echo "[i] S4 $S4 + $SM == S3 $S3 .. $S0 => $S1">&2
+
+ZSTD_HDR $BS
+printf "%${S4}s${MARK_FILE_END}" " "
+
+) | $xxhsum >> $OUT 2>/tmp/xxhsum.txt
+#) >> $OUT
+
+xxhsum=$(cat /tmp/xxhsum.txt)
+
+(
+ZSTD_HDR $BH
+echo "$IN"
+echo "xxh128sum: $xxhsum"
+) | dd of=$OUT conv=notrunc
+
+#dd if=$OUT bs=$BS skip=1 | $chksum
+#ls -l1 $OUT
+
+file $OUT && zstd -l $OUT
+

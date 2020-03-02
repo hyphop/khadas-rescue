@@ -8,6 +8,10 @@ GET ONLINE USAGE HELP
 
     curl -sfL dl.khadas.com/.mega | sh -s - --help
 
+ONLINE IMAGE WRITE SYNTAX
+
+    curl -sfL dl.khadas.com/.mega | sh -s - SOC_ID [ IMAGE_NAME ] > [ SD | MMC | FILE ]
+
 next commands lines demonstrage how-to
 
 CHANGE system without SD card just by direct write to eMMC

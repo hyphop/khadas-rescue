@@ -129,7 +129,8 @@ META="${S%.sd}-$HASH-$TIME-$SIZE-$MD5.sd.img.vfat"
 ./zstd_header2 "$(basename $META)
 $(cat $S.img.msg)
 " > $t.zst
-cat $t | zstd -18 -T0 >> $t.zst
+#cat $t | zstd -18 -T0 >> $t.zst
+cat $t | zstd --ultra -22 -T0 >> $t.zst
 ./zstd_header2 "
 ##KRESCUE##END
 " >> $t.zst

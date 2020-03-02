@@ -4,6 +4,7 @@ share/*
 bin/*
 scripts/bin/*
 
+*.bak
 *.vpn
 *.ovpn
 

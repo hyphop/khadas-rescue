@@ -28,3 +28,4 @@ printf "%b" '\x50\x2A\x4D\x18'
 printf "%b" "\x$h1\x$h2\x$h3\x$h4"
 printf "$MSG"
 )
+

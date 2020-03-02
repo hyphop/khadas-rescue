@@ -1,0 +1,130 @@
+#!/bin/bash
+
+## hyphop ##
+
+#= ZSTD advanced
+
+ZSTDA="
+ _________ _____ ____    _    
+|__  / ___|_   _|  _ \  / \   
+  / /\___ \ | | | | | |/ _ \  
+ / /_ ___) || | | |_| / ___ \ 
+/____|____/ |_| |____/_/   \_\
+
+"
+
+#+ zstd image header
+#+ 4096 block size padding
+#+ zstd image tail
+
+chksum="xxhsum -H2"
+chkname="xxh128sum"
+
+ZSTD_HDR(){
+hdr_sz=$1
+echo "[i] zstd header $1">&2
+hdr_sx=$(printf "%08x" $1)
+
+#########
+#01234567
+#########
+
+h1=${hdr_sx:6:2}
+h2=${hdr_sx:4:2}
+h3=${hdr_sx:2:2}
+h4=${hdr_sx:0:2}
+
+printf "%b" '\x50\x2A\x4D\x18'
+printf "%b" "\x$h1\x$h2\x$h3\x$h4"
+
+}
+
+MARK_INFO_BEGIN="##ZSTD_INFO"
+MARK_INFO_END="##ZSTD-INFO"
+MARK_FILE_END="
+##ZSTD#END
+"
+
+BS=4096
+ZSTD_HDR_SIZE=8
+
+IN=$1
+
+[ "$IN" ] || {
+    echo "[w] undef input file">&2
+    exit 1
+}
+
+OUT=$2
+
+#CMP="--ultra -22"
+CMP=""
+
+[ "$OUT" ] || OUT="$IN.zstd"
+
+BH=$((BS-ZSTD_HDR_SIZE))
+ZSTD_HDR $BH > $OUT
+
+printf "%${BH}s" " " >> $OUT
+
+zstd -T0 -c $CMP $IN >> $OUT
+
+#exit 0
+
+# UNPACK_SIZE
+S=$(stat -L -c%s $IN)
+# PACKED_SIZE withoud bound tail mark
+S0=$(stat -L -c%s $OUT)
+S0=$((S0-BS))
+SM=${#MARK_FILE_END}
+S1=$((S0+ZSTD_HDR_SIZE))
+S2=$((S1/BS*BS))
+
+[ $S2 = $S1 ] || S2=$((S2+BS))
+S21=$((S2-S1))
+S22=$((S21))
+echo "[i] S: $S => S0: $S0 => S1: $S1 => S2: $S2 S21: $S21 S22: $S22"
+
+ZSTD_HDR $((S22)) >> $OUT
+printf "%${S22}s" " " >> $OUT
+
+ls -l1 $OUT
+SIZE_=$(stat -c%s $OUT)
+SIZE_CHK=$((SIZE_/BS*BS))
+
+[ $SIZE_ = $SIZE_CHK ] || {
+    echo "[e] wrong output size not div by $SIZE_ != $SIZE_CHK /// $BS">&2
+}
+
+exit 0
+
+for IN_CHKSUM in $(dd if=$IN bs=$BS  2>/dev/null | $chksum); do
+break
+done
+
+for OUT_CHKSUM in $(dd if=$OUT bs=$BS skip=1 2>/dev/null | $chksum); do
+break
+done
+
+
+(
+ZSTD_HDR $BH
+echo "
+$IN
+$MARK_INFO_BEGIN
+FILE_NAME: $IN
+FMT: zstd
+UNPACK_SIZE: $S
+PACKED_SIZE: $S0
+FILE_SIZE: $((S1+BS))
+HEADER_SIZE: $BS
+DATA_SIZE: $S1
+BOUND_SIZE: $((S1+BS-S0))
+OUT-$chkname: $OUT_CHKSUM
+IN-$chkname: $IN_CHKSUM
+$MARK_INFO_END
+"
+) | dd of=$OUT conv=notrunc
+
+file $OUT && zstd -l $OUT
+

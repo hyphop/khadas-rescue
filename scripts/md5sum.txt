@@ -1,1 +1,1 @@
-352ce1e54d04e08db356627c25570f74  /tmp/krescue.sd.img.vfat
+aec82713c46e9b18d119f5dbc9b2995f  /tmp/krescue.sd.img.vfat

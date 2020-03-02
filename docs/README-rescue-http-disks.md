@@ -1,4 +1,4 @@
-# read disk data by http
+# READ disk data by http
 
 read from mmc / sd / spi / sdc ..... device disk
 
@@ -15,6 +15,7 @@ device alias mode examples
    wget http://172.22.1.1/cgi-bin/disk/rd/sd
    curl http://krescue.local/cgi-bin/disk/rd/mmc > vim3_raw_mmc_image.bin
    wget http://192.168.1.150/cgi-bin/disk/rd/mmc -O vim3_raw_mmc_image.bin
+
 
 device block name mode examples
 
@@ -36,7 +37,24 @@ device block name mode examples
     dev/sda		-> /dev/sda
     dev/sdb		-> /dev/sdb
 
-## write mode WIP
+# WRITE data to disk by http
 
-    ....
+write to mmc / sd / spi / sdc ..... device disk
 
+    http://172.22.1.1/cgi-bin/disk/wr
+    http://ETH_IP/cgi-bin/disk/wr
+    http://krescue.local/cgi-bin/disk/wr
+
+## usage
+
+   # raw image
+   curl --data-binary @IMG HOST/cgi-bin/disk/wr/mmc
+
+   # compressed stream
+   curl --data-binary @IMG.gz  HOST/cgi-bin/disk/wr/mmc.gz
+   curl --data-binary @IMG.xz  HOST/cgi-bin/disk/wr/mmc.xz
+   curl --data-binary @IMG.zst HOST/cgi-bin/disk/wr/mmc.zst
+
+## examples
+
+   curl --data-binary @Manjaro-ARM-kde-plasma-vim3-20.02.img.zst 192.168.100.104:8080/cgi-bin/disk/wr/mmc.zst
