@@ -188,7 +188,8 @@ case "$IN" in
     *.xz)
     echo "[i] xz image mode">&2
     ASK
-    xz -dc "$IN" | pv | $sudo dd $ARGS of=$SD || FAIL write data
+    pixz -dc < "$IN" | $sudo pv > $SD || FAIL write data
+#    xz -dc "$IN" | pv | $sudo dd $ARGS of=$SD || FAIL write data
     ;;
     *.zip)
     echo "[i] zip image mode">&2

@@ -12,3 +12,4 @@ scripts/bin/*
 !README.txt
 
 
+*.tar.gz

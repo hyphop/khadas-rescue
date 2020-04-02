@@ -12,7 +12,7 @@
 
     kbi hwver
 
-    echo "** KRESCUE START hwver: $hwver hostname: $hostname maxcpus: $maxcpus **"
+    echo "** KRESCUE START hwver: $hwver hostname: $hostname maxcpus: $maxcpus fdt: $fdtfile source: $boot_source:$BOOTED**"
 
     setenv ENV_ADDR 0x32000000
     setenv Cenv     /rescue/80_user_env.txt
@@ -59,8 +59,11 @@ if test "$maxcpus" = ""; then
     test "$hostname" = "arm_gxbb" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
     test "$hostname" = "KVIM3" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
     test "$hostname" = "kVIM1" && setenv Cdtb /rescue/krescue-vim1.dtb
+    test "$hostname" = "KVim" && setenv Cdtb /rescue/krescue-vim1.dtb
 else
-    test "$hwver" = "VIM3.V12" && test "$maxcpus" = "4" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
+    echo "[w] detect by maxcpus -$maxcpus-"
+    test "$maxcpus" = "4" && setenv Cdtb /rescue/krescue-vim1.dtb
+    test "$maxcpus" = "4" && test "$hwver" = "VIM3.V12" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
     test "$maxcpus" = "6" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
     test "$maxcpus" = "8" && setenv Cdtb /rescue/krescue-vim2.dtb
 fi
@@ -71,7 +74,7 @@ test "$fdtfile" = "amlogic/meson-gxl-s905x-khadas-vim.dtb" && setenv Cdtb /rescu
 test "$fdtfile" = "amlogic/meson-gxm-khadas-vim2.dtb" && setenv Cdtb /rescue/krescue-vim2.dtb
 test "$fdtfile" = "amlogic/meson-g12b-a311d-khadas-vim3.dtb" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
 
-#boot_source=sd
+test "$boot_source" = "" || setenv BOOTED $boot_source
 
 if test "$Cdtb" = "/rescue/krescue-vim.dtb"; then
     echo "[w] dtb not detected force use static: $Cdtb"
