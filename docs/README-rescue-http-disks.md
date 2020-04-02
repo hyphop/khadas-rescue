@@ -1,4 +1,6 @@
-# READ disk data by http
+# READ WRITE disk data by http
+
+## READ data disk by http
 
 read from mmc / sd / spi / sdc ..... device disk
 
@@ -7,7 +9,7 @@ read from mmc / sd / spi / sdc ..... device disk
     NOTE: ETH_NET 100Mbit mode is  about 10MB/s transfer speed
     NOTE: ETH gigabit lan (VIM2 VIM3 VIM3L) is about 110MB/s transfer speed
 
-## examples
+### examples
 
 device alias mode examples
 
@@ -22,7 +24,7 @@ device block name mode examples
    wget http://172.22.1.1/cgi-bin/disk/rd/dev/sda
    wget http://172.22.1.1/cgi-bin/disk/rd/dev/mmcblk1
 
-## more access info
+### more access info
 
     http://172.22.1.1/cgi-bin/disk/rd
     http://ETH_IP/cgi-bin/disk/rd
@@ -37,7 +39,7 @@ device block name mode examples
     dev/sda		-> /dev/sda
     dev/sdb		-> /dev/sdb
 
-# WRITE data to disk by http
+## WRITE data to disk by http
 
 write to mmc / sd / spi / sdc ..... device disk
 
@@ -57,4 +59,18 @@ write to mmc / sd / spi / sdc ..... device disk
 
 ## examples
 
-   curl --data-binary @Manjaro-ARM-kde-plasma-vim3-20.02.img.zst 192.168.100.104:8080/cgi-bin/disk/wr/mmc.zst
+fastest way write image direct to emmc by net (USB|ETH)
+
+   curl --data-binary @VIM*.img.zst krescue.local/cgi-bin/disk/wr/mmc.zst
+   curl --data-binary @$(ls VIM*.img.zst) krescue.local/cgi-bin/disk/wr/mmc.zst
+
+HTTP RESPONSE
+
+```
+POST
+/dev/mmcblk2
+zstd
+application/x-www-form-urlencoded
+585052120
+0
+```
