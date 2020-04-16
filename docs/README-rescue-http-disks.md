@@ -1,8 +1,11 @@
 # READ WRITE disk data by http
 
+We can very ease dump and restore images or install any kresq image by network.
+Vim device must be started from krescue sd and stay in one local network with your
+
 ## READ data disk by http
 
-read from mmc / sd / spi / sdc ..... device disk
+Read from mmc / sd / spi / sdc ..... device disk
 
 ### examples
 
