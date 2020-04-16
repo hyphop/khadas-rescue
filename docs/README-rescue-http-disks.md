@@ -4,39 +4,46 @@
 
 read from mmc / sd / spi / sdc ..... device disk
 
-    NOTE: mdns krescue.local hostname can resolved to USB_IP same as ETH_IP
-    NOTE: USB_NET is about 15MB/s transfer speed
-    NOTE: ETH_NET 100Mbit mode is  about 10MB/s transfer speed
-    NOTE: ETH gigabit lan (VIM2 VIM3 VIM3L) is about 110MB/s transfer speed
-
 ### examples
 
-device alias mode examples
+download by url via your favotite browser or downloader
 
-   wget http://krescue.local/cgi-bin/disk/rd/mmc
-   wget http://172.22.1.1/cgi-bin/disk/rd/sd
-   curl http://krescue.local/cgi-bin/disk/rd/mmc > vim3_raw_mmc_image.bin
-   wget http://192.168.1.150/cgi-bin/disk/rd/mmc -O vim3_raw_mmc_image.bin
++ http://krescue.local/api/disk/read/mmc	# raw image
++ http://krescue.local/api/disk/read/mmc.zst	# compressed
++ http://krescue.local/api/disk/read/mmc.gz	# compressed by gz
 
+### NOTES
 
-## next example download only 5G emmc of image
++ we can replace krescue.local to krescue or krescue.lan or valid krescue IP address
++ mdns krescue.local hostname can resolved to USB_IP same as ETH_IP
++ USB_NET is about 15-20MB/s transfer speed
++ ETH_NET 100Mbit mode is  about 10MB/s transfer speed
++ ETH gigabit lan (VIM2 VIM3 VIM3L) is about 110MB/s transfer speed
 
-   wget http://krescue.lan/cgi-bin/disk/rdz/mmc:5G
+### Wget / Curl usage
 
-   > VIM2.1586162412.5G.emmc.img.zst
+   wget http://krescue.local/api/disk/read/mmc
+   wget http://172.22.1.1/api/disk/read/sd
+   curl -L http://krescue.local/api/disk/read/mmc.zst -o vim3_raw_mmc_image.bin.zst
+   curl -L http://krescue.local/api/disk/read/mmc.zst -O
+   curl -L http://krescue.local/api/disk/read/mmc > myimage.img
+   wget http://192.168.1.150/api/disk/read/mmc -O vim3_raw_mmc_image.bin
+
+## next example download only 4M emmc of image
+
+   wget http://krescue.lan/api/disk/read/mmc:5M
+
+   > VIM2.1586162412.5M.emmc.img
 
 device block name mode examples
 
-   wget http://172.22.1.1/cgi-bin/disk/rd/dev/sda
-   wget http://172.22.1.1/cgi-bin/disk/rd/dev/mmcblk1
+   wget http://172.22.1.1/api/disk/read/dev/sda
+   wget http://172.22.1.1/api/disk/read/dev/mmcblk1
 
 ### more access info
 
-    http://172.22.1.1/cgi-bin/disk/rd
-    http://ETH_IP/cgi-bin/disk/rd
-    http://krescue.local/cgi-bin/disk/rd
-
     mmc1		-> mmc part 1
+    mmc2		-> mmc part 2
     sd			-> sd
     sd1			-> sd part 1
     sd2			-> sd part 2
@@ -49,28 +56,28 @@ device block name mode examples
 
 write to mmc / sd / spi / sdc ..... device disk
 
-    http://172.22.1.1/cgi-bin/disk/wr
-    http://ETH_IP/cgi-bin/disk/wr
-    http://krescue.local/cgi-bin/disk/wr
+    http://krescue.local/api/disk/write
 
-## usage
+### Curl usage
 
    # raw image
-   curl --data-binary @IMG HOST/cgi-bin/disk/wr/mmc
+   curl -L --data-binary @IMG       HOST/api/disk/write/mmc
 
    # compressed stream
-   curl --data-binary @IMG.gz  HOST/cgi-bin/disk/wr/mmc.gz
-   curl --data-binary @IMG.xz  HOST/cgi-bin/disk/wr/mmc.xz
-   curl --data-binary @IMG.zst HOST/cgi-bin/disk/wr/mmc.zst
+   curl -L --data-binary @IMG.gz    HOST/api/disk/write/mmc.gz
+   curl -L --data-binary @IMG.xz    HOST/api/disk/write/mmc.xz
+   curl -L --data-binary @IMG.zst   HOST/api/disk/write/mmc.zst
+   curl -L --data-binary @IMG.kresq HOST/api/disk/write/mmc.kresq
 
-## examples
+### more examples
 
 fastest way write image direct to emmc by net (USB|ETH)
 
-   curl --data-binary @VIM*.img.zst krescue.local/cgi-bin/disk/wr/mmc.zst
-   curl --data-binary @$(ls VIM*.img.zst) krescue.local/cgi-bin/disk/wr/mmc.zst
+   curl -L --data-binary @VIM*.img.zst       krescue.local/api/disk/write/mmc.zst
+   curl -L --data-binary @$(ls VIM*.img.zst) krescue.local/api/disk/write/mmc.zst
+   curl -L --data-binary @VIM*.img           krescue.local/api/disk/write/mmc
 
-HTTP RESPONSE
+### HTTP RESPONSE
 
 ```
 POST
@@ -81,53 +88,3 @@ application/x-www-form-urlencoded
 0
 ```
 
-## write2emmc - upload script
-
-```
-#!/bin/sh
-
-ext=
-file "$1" | grep -q "Zstandard" && ext=.zst
-curl --data-binary @"$1" krescue/cgi-bin/disk/wr/mmc$ext
-
-```
-
-## kwrite_http example
-
-
-```
-
-cd ../khadas/fenix/build/images
-
-ls -l1 VIM1_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img
-
--rw-r--r-- 1 root root 2738880512 Apr 13 17:14 VIM1_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img
-
-curl krescue.local/tools/kwrite | sh -s - VIM3*.img
-
-# or
-
-wget krescue.local/tools/kwrite
-
-sh ./kwrite VIM3L_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img 
-
-[i] compress VIM3L_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img and write => krescue
-[i] wait ...
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  566M    0   265  100  566M      3  7187k  0:01:20  0:01:20 --:--:--    68
-
-# IMAGE WAS WRITED
-
-to       : /dev/mmcblk2
-bytes    : 593575110
-format   : zstd
-duration : 81
-status   : 0
-
-# PARTS
-
-/dev/mmcblk2p2: LABEL="ROOTFS" UUID="c6e5e4f8-0cb5-4e50-b3a6-1478dfb49edc" TYPE="ext4"
-/dev/mmcblk2p1: LABEL="BOOT" UUID="5DF2-E5A1" TYPE="vfat"
-
-```
