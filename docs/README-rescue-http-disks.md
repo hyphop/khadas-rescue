@@ -25,23 +25,22 @@ download by url via your favotite browser or downloader
 
 ### Wget / Curl usage
 
-   wget http://krescue.local/api/disk/read/mmc
-   wget http://172.22.1.1/api/disk/read/sd
-   curl -L http://krescue.local/api/disk/read/mmc.zst -o vim3_raw_mmc_image.bin.zst
-   curl -L http://krescue.local/api/disk/read/mmc.zst -O
-   curl -L http://krescue.local/api/disk/read/mmc > myimage.img
-   wget http://192.168.1.150/api/disk/read/mmc -O vim3_raw_mmc_image.bin
+    wget http://krescue.local/api/disk/read/mmc
+    wget http://172.22.1.1/api/disk/read/sd
+    curl -L http://krescue.local/api/disk/read/mmc.zst -o vim3_raw_mmc_image.bin.zst
+    curl -L http://krescue.local/api/disk/read/mmc.zst -O
+    curl -L http://krescue.local/api/disk/read/mmc > myimage.img
+    wget http://192.168.1.150/api/disk/read/mmc -O vim3_raw_mmc_image.bin
 
 ## next example download only 4M emmc of image
 
-   wget http://krescue.lan/api/disk/read/mmc:5M
-
-   > VIM2.1586162412.5M.emmc.img
+    wget http://krescue.lan/api/disk/read/mmc:5M
+    > VIM2.1586162412.5M.emmc.img
 
 device block name mode examples
 
-   wget http://172.22.1.1/api/disk/read/dev/sda
-   wget http://172.22.1.1/api/disk/read/dev/mmcblk1
+    wget http://172.22.1.1/api/disk/read/dev/sda
+    wget http://172.22.1.1/api/disk/read/dev/mmcblk1
 
 ### more access info
 
@@ -63,22 +62,22 @@ write to mmc / sd / spi / sdc ..... device disk
 
 ### Curl usage
 
-   # raw image
-   curl -L --data-binary @IMG       HOST/api/disk/write/mmc
+    # raw image
+    curl -L --data-binary @IMG       HOST/api/disk/write/mmc
 
-   # compressed stream
-   curl -L --data-binary @IMG.gz    HOST/api/disk/write/mmc.gz
-   curl -L --data-binary @IMG.xz    HOST/api/disk/write/mmc.xz
-   curl -L --data-binary @IMG.zst   HOST/api/disk/write/mmc.zst
-   curl -L --data-binary @IMG.kresq HOST/api/disk/write/mmc.kresq
+    # compressed stream
+    curl -L --data-binary @IMG.gz    HOST/api/disk/write/mmc.gz
+    curl -L --data-binary @IMG.xz    HOST/api/disk/write/mmc.xz
+    curl -L --data-binary @IMG.zst   HOST/api/disk/write/mmc.zst
+    curl -L --data-binary @IMG.kresq HOST/api/disk/write/mmc.kresq
 
 ### more examples
 
 fastest way write image direct to emmc by net (USB|ETH)
 
-   curl -L --data-binary @VIM*.img.zst       krescue.local/api/disk/write/mmc.zst
-   curl -L --data-binary @$(ls VIM*.img.zst) krescue.local/api/disk/write/mmc.zst
-   curl -L --data-binary @VIM*.img           krescue.local/api/disk/write/mmc
+    curl -L --data-binary @VIM*.img.zst       krescue.local/api/disk/write/mmc.zst
+    curl -L --data-binary @$(ls VIM*.img.zst) krescue.local/api/disk/write/mmc.zst
+    curl -L --data-binary @VIM*.img           krescue.local/api/disk/write/mmc
 
 ### HTTP RESPONSE
 
@@ -90,4 +89,3 @@ application/x-www-form-urlencoded
 585052120
 0
 ```
-
