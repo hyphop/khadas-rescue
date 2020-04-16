@@ -34,5 +34,8 @@ when special SD folder was created - just start krescue from sd
 1) krescue mount shares automaticly to samba-IP-SHARENAME folders
 2) all shares must be without password and have RW mode if u neen dump images
 
+# manual mount remount shares
 
+    MENU -> advanced  -> unmount dump storage
+		      \  mount dump storages
 
