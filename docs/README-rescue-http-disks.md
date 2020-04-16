@@ -44,15 +44,15 @@ device block name mode examples
 
 ### more access info
 
-    mmc1		-> mmc part 1
-    mmc2		-> mmc part 2
-    sd			-> sd
-    sd1			-> sd part 1
-    sd2			-> sd part 2
-    dev/mmcblk1p1	-> /dev/mmcblk1p1
-    dev/mmcblk1p1	-> /dev/mmcblk1p1
-    dev/sda		-> /dev/sda
-    dev/sdb		-> /dev/sdb
+    mmc1           -> mmc part 1
+    mmc2           -> mmc part 2
+    sd             -> sd
+    sd1            -> sd part 1
+    sd2            -> sd part 2
+    dev/mmcblk1p1  -> /dev/mmcblk1p1
+    dev/mmcblk1p1  -> /dev/mmcblk1p1
+    dev/sda        -> /dev/sda
+    dev/sdb        -> /dev/sdb
 
 ## WRITE data to disk by http
 
