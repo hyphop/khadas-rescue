@@ -169,6 +169,11 @@ setenv bootargs "${bootargs} video_reverse=${video_reverse} jtag=${jtag} reboot_
 
 setenv bootargs "${bootargs} dtb=$Cdtb"
 
+# autodetect fix green
+osd12=
+#test "$fdtfile" = "" && osd12=osd12
+setenv bootargs "${bootargs} $osd12"
+
 #fdt addr ${dtb_mem_addr};
 #fdt resize 65536
 #fdt set /adc_keypad key_val <120>

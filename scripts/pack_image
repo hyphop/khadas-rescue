@@ -76,7 +76,7 @@ SPI_PARTS_CMDLINE="mtdparts="
 INITRD_ADDR=0x3000000
  LINUX_ADDR=0x1080000
 
-KERNEL_CMP=lzma
+#KERNEL_CMP=lzma
 KERNEL_CMP=gzip
 
 BLOCK_SIZE=$((1024*64))
@@ -291,8 +291,10 @@ CMPDATE(){
 #[ -f $CKERNEL ] || {
 
 #lzma -dc $CKERNEL >/dev/null || {
-[ -f $CKERNEL ] && \
-    rm $CKERNEL
+
+#[ -f $CKERNEL ] && \
+#    rm $CKERNEL
+
 #}
 
     CMPDATE $LINUX_IMAGE $CKERNEL && {
@@ -645,3 +647,12 @@ ls -l1L $OUT.gz
 echo "[i] image $OUT.gz - is ready">&2
 
 echo "[i] image $OUT_SPI -> $OUT - is ready">&2
+
+SPI_BOOT_CMD="
+sf probe 0 104000000; sf read \$loadaddr $UBOOT_SCRIPT_SCR_OFFSET_HEX 8192 && script \$loadaddr 8192
+"
+
+
+echo "SPI_BOOT_CMD: $SPI_BOOT_CMD"
+
+

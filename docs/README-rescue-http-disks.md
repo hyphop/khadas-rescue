@@ -19,6 +19,12 @@ device alias mode examples
    wget http://192.168.1.150/cgi-bin/disk/rd/mmc -O vim3_raw_mmc_image.bin
 
 
+## next example download only 5G emmc of image
+
+   wget http://krescue.lan/cgi-bin/disk/rdz/mmc:5G
+
+   > VIM2.1586162412.5G.emmc.img.zst
+
 device block name mode examples
 
    wget http://172.22.1.1/cgi-bin/disk/rd/dev/sda
@@ -73,4 +79,55 @@ zstd
 application/x-www-form-urlencoded
 585052120
 0
+```
+
+## write2emmc - upload script
+
+```
+#!/bin/sh
+
+ext=
+file "$1" | grep -q "Zstandard" && ext=.zst
+curl --data-binary @"$1" krescue/cgi-bin/disk/wr/mmc$ext
+
+```
+
+## kwrite_http example
+
+
+```
+
+cd ../khadas/fenix/build/images
+
+ls -l1 VIM1_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img
+
+-rw-r--r-- 1 root root 2738880512 Apr 13 17:14 VIM1_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img
+
+curl krescue.local/tools/kwrite | sh -s - VIM3*.img
+
+# or
+
+wget krescue.local/tools/kwrite
+
+sh ./kwrite VIM3L_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img 
+
+[i] compress VIM3L_Debian-server-buster_Linux-5.5-rc2_arm64_SD-USB_V0.8.3-20200413.img and write => krescue
+[i] wait ...
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  566M    0   265  100  566M      3  7187k  0:01:20  0:01:20 --:--:--    68
+
+# IMAGE WAS WRITED
+
+to       : /dev/mmcblk2
+bytes    : 593575110
+format   : zstd
+duration : 81
+status   : 0
+
+# PARTS
+
+/dev/mmcblk2p2: LABEL="ROOTFS" UUID="c6e5e4f8-0cb5-4e50-b3a6-1478dfb49edc" TYPE="ext4"
+/dev/mmcblk2p1: LABEL="BOOT" UUID="5DF2-E5A1" TYPE="vfat"
+
 ```
