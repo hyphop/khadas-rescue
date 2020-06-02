@@ -23,7 +23,7 @@
 
     echo "[i] scan rescue device"
 
-	for d in 0 1 2; do
+	for d in 0 1 2 1:5; do
 	    if test "X$devnum" = "X"; then
 	    echo "[i] scan rescue device $d test $devnum"
 	    fatload $devtype $d $ENV_ADDR $Cenv && setenv devnum $d
@@ -132,11 +132,13 @@ fi
 ##############################################################
 
 
+if test "$fdtfile" = "" ; then
+
 echo "load logo"
 echo $LOADER $LOGO_ADDR $Csplash
 $LOADER $LOGO_ADDR $Csplash
 
-if bmp display $LOGO_ADDR 0 0; then 
+if bmp display $LOGO_ADDR m m; then 
     echo "BMP OK"
 else
     echo "BMP KO"
@@ -144,6 +146,8 @@ else
     $LOADER $LOGO_ADDR $Csplash2
     echo unzip $LOGO_ADDR $LOGO_ADDR2
     unzip $LOGO_ADDR $LOGO_ADDR2
+fi
+
 fi
 
 echo "load dtb"
@@ -171,8 +175,8 @@ setenv bootargs "${bootargs} dtb=$Cdtb"
 
 # autodetect fix green
 osd12=
-#test "$fdtfile" = "" && osd12=osd12
-setenv bootargs "${bootargs} $osd12"
+test "$fdtfile" = "" || osd12=osd12
+setenv bootargs "${bootargs} $osd12 samba-usb-krescue"
 
 #fdt addr ${dtb_mem_addr};
 #fdt resize 65536

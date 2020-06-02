@@ -86,8 +86,16 @@ UBOOT_SPI=../share/u-boot.spi.bin
 
     echo "[i] change uboot version to $UBOOT_VER">&2
 
-    CMD ln -sf u-boot.vim$UBOOT_VER.sd.bin $UBOOT_SD
-    CMD ln -sf u-boot.vim$UBOOT_VER.spi.bin $UBOOT_SPI
+#	legacy
+#
+#    CMD ln -sf u-boot.vim$UBOOT_VER.sd.bin $UBOOT_SD
+#    CMD ln -sf u-boot.vim$UBOOT_VER.spi.bin $UBOOT_SPI
+
+#
+#	mainline
+#
+    CMD ln -sf uboot.VIM$UBOOT_VER.sd.bin $UBOOT_SD
+    CMD ln -sf uboot.VIM$UBOOT_VER.spi.bin $UBOOT_SPI
 
 }
 
@@ -131,17 +139,19 @@ CMD cp -L ../docs/README-rescue.md $D
 CMD cp -L ../docs/README-rescue* $D$RESCUE/docs
 #CMD cp -L ../share/Image $D$RESCUE
 CMD cp -L ../share/uInitrd* $D$RESCUE
-CMD cp -L ../share/uImage* $D$RESCUE
+CMD cp -L ../share/uImage $D$RESCUE
+#CMD cp -L ../share/uImage* $D$RESCUE
 #CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/uboot.dtb
 #CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/uboot.dtb
 #CMD cp -L ../share/*_linux.dtb $D$RESCUE
 #CMD cp -L ../share/linux.dtb $D$RESCUE/linux.dtb
-CMD cp -L ../share/kvim_linux.dtb $D$RESCUE/vim1.dtb
-CMD cp -L ../share/kvim2_linux.dtb $D$RESCUE/vim2.dtb
-CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3.dtb
-CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3-a311d.dtb
-CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3-s922x.dtb
-CMD cp -L ../share/kvim3l_linux.dtb $D$RESCUE/vim3-s905d3.dtb
+
+#CMD cp -L ../share/kvim_linux.dtb $D$RESCUE/vim1.dtb
+#CMD cp -L ../share/kvim2_linux.dtb $D$RESCUE/vim2.dtb
+#CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3.dtb
+#CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3-a311d.dtb
+#CMD cp -L ../share/kvim3_linux.dtb $D$RESCUE/vim3-s922x.dtb
+#CMD cp -L ../share/kvim3l_linux.dtb $D$RESCUE/vim3-s905d3.dtb
 
 for f in ../share/krescue-*.dtb; do
     [ -f "$f" ] && {
@@ -149,8 +159,9 @@ for f in ../share/krescue-*.dtb; do
     }
 done
 
-CMD cp -L ../share/splash.bmp.gz $D$RESCUE
-CMD cp -L ../share/splash.bmp.2.gz $D$RESCUE
+CMD cp -L ../files/splash.bmp.gz $D$RESCUE
+CMD cp -L ../files/splash.bmp.2.gz $D$RESCUE
+CMD cp -L ../files/splash2.bmp $D/splash.bmp
 #CMD cp ../files/*_env.txt $D$RESCUE
 CMD cp -L ../share/*_env.txt $D$RESCUE
 
@@ -161,6 +172,8 @@ CMD cp -Lr ../files/extra $D$RESCUE
 CMD $mkimage -C none -A arm -T script -d $D$RESCUE/rescue.cmd $D$RESCUE/rescue.scr
 
 cat ../files/boot.ini ../files/rescue.cmd >> $D/boot.ini
+CMD mkdir $D/boot
+cat ../files/boot.ini ../files/rescue.cmd >> $D/boot/boot.ini
 
 CMD cp $D$RESCUE/rescue.cmd $D$RESCUE/hook.cmd
 CMD cp $D$RESCUE/rescue.scr $D$RESCUE/hook.scr
@@ -170,7 +183,7 @@ CMD cp $D$RESCUE/rescue.scr $D/s905_autoscript
 CMD cp $D$RESCUE/rescue.scr $D/aml_autoscript
 CMD cp $D$RESCUE/rescue.scr $D/cfgload		# coreelec
 
-CMD cp ../share/openwrt_khadas_fw_vims.tar.xz $D$RESCUE
+#CMD cp ../share/openwrt_khadas_fw_vims.tar.xz $D$RESCUE
 
 [ "" ] && {
 for v in vim3 vim3l vim2 vim1; do
@@ -192,7 +205,8 @@ done
 for v in VIM3 VIM3L VIM2 VIM1; do
 for t in sd.bin spi.bin bin.gz; do
 for s in /tmp ../bin; do
-U="$s/uboot_vims/u-boot.$v.$t"
+#U="$s/uboot_vims/u-boot.$v.$t"
+U="$s/uboot-mainline/u-boot.$v.$t"
 [ -f "$U" ] && {
     case $U in
 	*gz)

@@ -1,0 +1,92 @@
+#!/bin/sh
+
+## hyphop ##
+
+#= tftp dhcp server + traffic forward
+
+#set -e 
+
+[ "$CONF" ] || CONF="$1"
+[ "$CONF" ] || CONF=conf/dhcp.conf
+
+[ "$1" ] && {
+    shift
+}
+
+[ -f "$CONF" ] || {
+    echo "[e] not found config file: $CONF">&2
+    exit 1
+}
+
+echo "[i] config $CONF">&2
+
+RP=$(realpath $0); DP=$(dirname $RP); . $DP/$CONF
+
+## need a root privs
+for runas in $DP/bin/runas runas sudo; do
+    which $runas 1>/dev/null && {
+    echo "[i] runas = $runas">&2
+    break
+    }
+done
+
+$runas $(which pkill) -f $PID_FILE
+
+case "$1" in
+    stop|off)
+    exit 0
+    ;;
+esac
+
+IPT_RULE="INPUT -p udp -m multiport --dports 67,69 -i $DEV -j ACCEPT"
+
+iptables="$runas $(which iptables)"
+
+$iptables -D $IPT_RULE >/dev/null 2>/dev/null
+$iptables -I $IPT_RULE
+
+
+TEST=1
+[ "$TEST" = "1" ] && debug=-d
+[ "$1" = "test" ] && debug=-d
+
+
+RUNIT(){
+    echo "[#] $@">&2
+    "$@"
+}
+
+RUNAS=--user=root
+RUNAS=
+
+dnsmasq="$runas $(which dnsmasq)"
+
+SHARE="$DP/../share"
+SHARE2="/tmp/krescue.share"
+
+## secure tricks
+for a in $SHARE2; do
+    [ -e $a ] || ln -s "$SHARE" $a
+done
+
+SHARE=$SHARE2
+
+#	--tftp-secure \
+
+#$runas $(which net_forward) start
+$runas $DP/net_forward start
+
+#echo "$IP" > /tmp/dhcp_host.ip
+
+echo "[i] uboot cmd usage example">&2
+echo "[i] dhcp; tftp 0 boot.scr; autoscr 0">&2
+echo "[i] dhcp; tftp 1000000 boot.scr; source 1000000">&2
+ 
+RUNIT $dnsmasq $debug -p0 $RUNAS	\
+	-z -i $DEV			\
+	--enable-tftp=$DEV \
+	--tftp-root="$SHARE" \
+	--tftp-no-fail \
+	-Z \
+	-x $PID_FILE "$@"
+

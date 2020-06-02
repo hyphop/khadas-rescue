@@ -48,12 +48,15 @@ for n in 2 3 3L; do
     case $n in
 	2)
 	UBOOT_SD=../share/u-boot.vim2.sd.bin
+	UBOOT_SD=/tmp/uboot-mainline/u-boot.VIM2.sd.bin
 	;;
 	3)
 	UBOOT_SD=../share/u-boot.vim3.sd.bin
+	UBOOT_SD=/tmp/uboot-mainline/u-boot.VIM3.sd.bin
 	;;
 	3L)
 	UBOOT_SD=../share/u-boot.vim3l.sd.bin
+	UBOOT_SD=/tmp/uboot-mainline/u-boot.VIM3L.sd.bin
 	;;
     esac
     CMD dd if=/dev/zero bs=512 seek=1 count=$((START-1)) conv=notrunc of=$T2 2>$TL

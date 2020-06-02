@@ -20,7 +20,18 @@ REBUILD_RESCUE=
 case "$@" in
     -r)
     REBUILD_RESCUE=1
-    
+    ;;
+    -1)
+    UBOOT_VER=1
+    ;;
+    -2)
+    UBOOT_VER=2
+    ;;
+    -3)
+    UBOOT_VER=3
+    ;;
+    -3l|-l)
+    UBOOT_VER=3l
     ;;
 esac
 
@@ -76,7 +87,7 @@ SPI_PARTS_CMDLINE="mtdparts="
 INITRD_ADDR=0x3000000
  LINUX_ADDR=0x1080000
 
-#KERNEL_CMP=lzma
+KERNEL_CMP_SPI=lzma
 KERNEL_CMP=gzip
 
 BLOCK_SIZE=$((1024*64))
@@ -84,15 +95,23 @@ BLOCK_SIZH=$((1024*32))
 
 SYS_ENV=$S/00_system_env.txt
 
+[ "$UBOOT_VER" ] || UBOOT_VER=3
+
+echo "[i] uboot ver $UBOOT_VER">&2
+
 UBOOT_BIN=$S/u-boot.spi.bin
+UBOOT_BIN=$S/uboot.VIM$UBOOT_VER.spi.bin
+
 #UBOOT_SCRIPT=$S/*.cmd
 UBOOT_SCRIPT=$P/../files/rescue.cmd
 UBOOT_SCRIPT_ENV=$S/*env.txt
-UBOOT_LOGOS=$S/*.bmp.gz
+#UBOOT_LOGOS=$S/*.bmp.gz
+UBOOT_LOGOS=$S/splash.bmp
 #UBOOT_DTB=$S/*.dtb
 UBOOT_DTB=$S/krescue-vim$UBOOT_VER.dtb
 
 LINUX_U_IMAGE=$S/uImage
+LINUX_U_IMAGE_SPI=$S/uImage.spi
 LINUX_U_INITRD=$S/uInitrd
 
 LINUX_IMAGE=$S/Image
@@ -141,6 +160,7 @@ filesize(){
 ## find UBOOT sd
 
 UBOOT_BIN_SIZE=
+echo "uboot $UBOOT_BIN">&2
 
 for UBOOT_BIN in $UBOOT_BIN ""; do
     [ -L "$UBOOT_BIN" ] && {
@@ -270,11 +290,13 @@ LINUX_IMAGE_SIZE=$(filesize $LINUX_IMAGE) || exit 1
 
 
 CKERNEL=$UNI.Image.$KERNEL_CMP
+CKERNEL_SPI=$UNI.Image.$KERNEL_CMP_SPI
 
 [ $NOCACHE ] && {
     rm $CKERNEL
 }
 
+KNAME_SPI=$(basename $CKERNEL_SPI)
 KNAME=$(basename $CKERNEL)
 
 CMPDATE(){
@@ -302,6 +324,11 @@ CMPDATE(){
 	CMD $KERNEL_CMP -9 -c $LINUX_IMAGE > $CKERNEL
     }
 
+    CMPDATE $LINUX_IMAGE $CKERNEL_SPI && {
+	echo "[i] compress kernel $LINUX_IMAGE">&2
+	CMD $KERNEL_CMP_SPI -9 -c $LINUX_IMAGE > $CKERNEL_SPI
+    }
+
 #}
 
 CMPDATE $CKERNEL $LINUX_U_IMAGE && {
@@ -313,10 +340,25 @@ CMD $mkimage -A arm64 -O linux -C $KERNEL_CMP \
 	}
 }
 
+CMPDATE $CKERNEL_SPI $LINUX_U_IMAGE_SPI && {
+CMD $mkimage -A arm64 -O linux -C $KERNEL_CMP_SPI \
+	-T kernel -a $LINUX_ADDR -e $LINUX_ADDR \
+	-n "$KNAME" -d $CKERNEL_SPI $LINUX_U_IMAGE_SPI || {
+	    echo "[e] error mkimage ">&2
+	    exit 1
+	}
+}
+
 LINUX_U_IMAGE_SIZE=$(filesize $LINUX_U_IMAGE) || exit 1
+LINUX_U_IMAGE_SPI_SIZE=$(filesize $LINUX_U_IMAGE_SPI) || exit 1
 
 [ "$LINUX_U_IMAGE_SIZE" -lt 1000000 ] && {
     echo "[e] wrong LINUX_U_IMAGE_SIZE">&2
+    exit 1
+}
+
+[ "$LINUX_U_IMAGE_SPI_SIZE" -lt 1000000 ] && {
+    echo "[e] wrong LINUX_U_IMAGE_SPI_SIZE">&2
     exit 1
 }
 
@@ -442,7 +484,7 @@ SCRIPT_SIZE=$UBOOT_SCRIPT_SIZE
 ENV_SIZE=$UBOOT_SCRIPT_ENV_SIZE
 LOGO_SIZE=$UBOOT_LOGO_SIZE
 DTB_SIZE=$UBOOT_DTB_SIZE
-UIMAGE_SIZE=$LINUX_U_IMAGE_SIZE
+UIMAGE_SIZE=$LINUX_U_IMAGE_SPI_SIZE
 UINITRD_SIZE=$LINUX_U_INITRD_SIZE
 
 
@@ -554,7 +596,7 @@ UIMAGE_SIZE_PAD=$s
 o=$((o+$s))
 
 #FLINE "IMAGE"	$LINUX_IMAGE			$LINUX_IMAGE_SIZE	- - -
-FLINE "UIMAGE" $LINUX_U_IMAGE $LINUX_U_IMAGE_SIZE $UIMAGE_SIZE_PAD \
+FLINE "UIMAGE" $LINUX_U_IMAGE_SPI $LINUX_U_IMAGE_SPI_SIZE $UIMAGE_SIZE_PAD \
     $UIMAGE_OFFSET $UIMAGE_OFFSET_HEX
 
 

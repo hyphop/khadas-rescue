@@ -183,17 +183,39 @@ case "$IN" in
 
     ASK
 
-    gzip -dc "$IN" | pv -s $S | $sudo dd $ARGS of=$SD || FAIL write data
+#    gzip -dc "$IN" | pv -s $S | $sudo dd $ARGS of=$SD || FAIL write data
+    gzip -dc "$IN" | dd status=progress $ARGS of=$SD || FAIL write data
     ;;
     *.xz)
+    xz=$(which pixz)
+    [ "$xz" ] || xz=$(which xz)
+    [ "$xz" ] || FAIL "xz | pigz not installed"
+
     echo "[i] xz image mode">&2
     ASK
-    pixz -dc < "$IN" | $sudo pv > $SD || FAIL write data
+#    pixz -dc < "$IN" | $sudo pv > $SD || FAIL write data
+    $xz -dc < "$IN" | dd status=progress $ARGS of=$SD || FAIL write data
+
+    ;;
+    *.zst)
+    zst=$(which pzstd)
+    [ "$xz" ] || xz=$(which zstd)
+    [ "$xz" ] || FAIL "zstd | not installed"
+
+    echo "[i] zst image mode">&2
+    ASK
+#    pixz -dc < "$IN" | $sudo pv > $SD || FAIL write data
+    $zst -f -d "$IN" -o $SD || FAIL write data
+
 #    xz -dc "$IN" | pv | $sudo dd $ARGS of=$SD || FAIL write data
     ;;
     *.zip)
+    unzip=$(which unzip)
+    [ "$unzip" ] || unzip=$(which zip)
+    [ "$unzip" ] || FAIL "unzip | zip not installed"
+
     echo "[i] zip image mode">&2
-    unzip -l "$IN" "*.img" || FAIL wrong zip
+    $unzip -l "$IN" "*.img" || FAIL wrong zip
     S=$(unzip -l "$IN" | grep ".img" | tail -1)
     S=$(echo $S)
     S=${S%% *}
@@ -202,12 +224,18 @@ case "$IN" in
 
     ASK
 
-    unzip -p "$IN" "*.img" | pv -s $S | $sudo dd $ARGS of=$SD || FAIL write data
+#   $unzip -p "$IN" "*.img" | pv -s $S | $sudo dd $ARGS of=$SD || FAIL write data
+    $unzip -p "$IN" "*.img" | dd status=progress $ARGS of=$SD || FAIL write data
 
     ;;
     *.7z)
+
+    z7=$(which 7z)
+    [ "$z7" ] || z7=$(which 7zr)
+    [ "$z7" ] || FAIL "7z not installed"
+
     echo "[i] 7z image mode">&2
-    IMG_DATA=$(7z l "$IN" | grep -m1 .img)
+    IMG_DATA=$($z7 l "$IN" | grep -m1 .img)
     IMG=${IMG_DATA##* }
     IMG_SIZE=${IMG_DATA% *}
     IMG_SIZE=$(echo $IMG_SIZE)
@@ -217,7 +245,9 @@ case "$IN" in
 
     ASK
 
-    7z x "$IN" "$IMG" -so | pv -s $S | $sudo dd $ARGS of=$SD
+#   z7 x "$IN" "$IMG" -so | pv -s $S | $sudo dd $ARGS of=$SD
+    z7 x "$IN" "$IMG" -so | dd status=progress $ARGS of=$SD || FAIL write data
+
 
     ;;
     *)
@@ -225,7 +255,8 @@ case "$IN" in
 
     ASK
 
-    pv "$IN" | $sudo dd $ARGS bs=1M of=$SD || FAIL write data
+#    pv "$IN" | $sudo dd $ARGS bs=1M of=$SD || FAIL write data
+    dd if="$IN" $ARGS bs=1M of=$SD || FAIL write data
 esac
 
 [ "$SAVE_PT" ] && {
