@@ -1,4 +1,4 @@
-# Krescue - tiny fast rescure system for khadas VIMs boards
+# Krescue - tiny fast rescure system for khadas VIMs and Edge boards (amlogic & rockchips socs)
 
 One universal rescue system for khadas vims boards.
 We try to make one simple alternative way for solve common users problems!
@@ -8,7 +8,7 @@ We try to make one simple alternative way for solve common users problems!
 
 ## status
 
-tested on VIM1 VIM2 VIM3 VIM3L
+tested on VIM1 VIM2 VIM3 VIM3L Edge
 
 ## features
 

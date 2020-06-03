@@ -41,24 +41,25 @@ START=$(echo ${START%%, *})
 
 echo "[i] START: $START"
 
-for n in 2 3 3L; do
-    T2=$K/VIM$n.krescue.sd.img
-    cp $T $T2
+for n in VIM2 VIM3 VIM3L Edge; do
+    T2=$K/$n.krescue.sd.img
+    CMD cp $T $T2
 
     case $n in
-	2)
-	UBOOT_SD=../share/u-boot.vim2.sd.bin
-	UBOOT_SD=/tmp/uboot-mainline/u-boot.VIM2.sd.bin
+	VIM2)
+	UBOOT_SD=/tmp/u-boot-mainline/VIM2.u-boot.sd.bin
 	;;
-	3)
-	UBOOT_SD=../share/u-boot.vim3.sd.bin
-	UBOOT_SD=/tmp/uboot-mainline/u-boot.VIM3.sd.bin
+	VIM3)
+	UBOOT_SD=/tmp/u-boot-mainline/VIM3.u-boot.sd.bin
 	;;
-	3L)
-	UBOOT_SD=../share/u-boot.vim3l.sd.bin
-	UBOOT_SD=/tmp/uboot-mainline/u-boot.VIM3L.sd.bin
+	VIM3L)
+	UBOOT_SD=/tmp/u-boot-mainline/VIM3L.u-boot.sd.bin
+	;;
+	Edge)
+	UBOOT_SD=/tmp/u-boot-mainline/Edge.u-boot.sd.bin
 	;;
     esac
+
     CMD dd if=/dev/zero bs=512 seek=1 count=$((START-1)) conv=notrunc of=$T2 2>$TL
     CMD dd if=$UBOOT_SD bs=512 skip=1 seek=1 conv=notrunc of=$T2 2>$TL
     CMD dd if=$UBOOT_SD bs=444 count=1 conv=notrunc of=$T2 2>$TL
@@ -79,6 +80,8 @@ cp $S/rescue/generated.* $K
 
 cd $K
 
+ZIP_=
+
 [ "OK" ] && {
 
 for t in *.img; do
@@ -87,6 +90,7 @@ for t in *.img; do
     META="${t%.sd.img}-$HASH-$TIME-$SIZE-$MD5.sd.img"
     echo "[i] META $META"
     sfdisk --dump $t| tail -1
+    [ "$ZIP_" ] && {
     zip -9 ${t%.img}.zip $t *.txt generated.*
     (
     printf "\n##KRESCUE_INFO\n"
@@ -101,6 +105,7 @@ for t in *.img; do
     echo "LINK: https://dl.khadas.com/Firmware/Krescue/"
     printf "\n##KRESCUE-INFO\n"
     ) | zip -z ${t%.img}.zip
+    }
     mv $t $META
     pigz -9 $META
     mv $META.gz $t.gz

@@ -4,11 +4,15 @@
 
 #= uboot script boot rescue system from spi / sd / emmc / dhcp / hook
 
+# chck mainline uboot
+#fdtcontroladdr
+
+
 ## PREPARE
 
     kbi hwver
 
-    echo "** KRESCUE START hwver: $hwver hostname: $hostname maxcpus: $maxcpus **"
+    echo "** KRESCUE START hwver: $hwver hostname: $hostname maxcpus: $maxcpus fdt: $fdtfile source: $boot_source:$BOOTED**"
 
     setenv ENV_ADDR 0x32000000
     setenv Cenv     /rescue/80_user_env.txt
@@ -19,7 +23,7 @@
 
     echo "[i] scan rescue device"
 
-	for d in 0 1 2; do
+	for d in 0 1 2 1:5; do
 	    if test "X$devnum" = "X"; then
 	    echo "[i] scan rescue device $d test $devnum"
 	    fatload $devtype $d $ENV_ADDR $Cenv && setenv devnum $d
@@ -55,11 +59,28 @@ if test "$maxcpus" = ""; then
     test "$hostname" = "arm_gxbb" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
     test "$hostname" = "KVIM3" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
     test "$hostname" = "kVIM1" && setenv Cdtb /rescue/krescue-vim1.dtb
+    test "$hostname" = "KVim" && setenv Cdtb /rescue/krescue-vim1.dtb
 else
-    test "$hwver" = "VIM3.V12" && test "$maxcpus" = "4" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
+    echo "[w] detect by maxcpus -$maxcpus-"
+    test "$maxcpus" = "4" && setenv Cdtb /rescue/krescue-vim1.dtb
+    test "$maxcpus" = "4" && test "$hwver" = "VIM3.V12" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
     test "$maxcpus" = "6" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
     test "$maxcpus" = "8" && setenv Cdtb /rescue/krescue-vim2.dtb
 fi
+
+## emmc MAINLINE UBOOT 
+test "$fdtfile" = "amlogic/meson-sm1-khadas-vim3l.dtb" && setenv Cdtb /rescue/krescue-vim3-s905d3.dtb
+test "$fdtfile" = "amlogic/meson-gxl-s905x-khadas-vim.dtb" && setenv Cdtb /rescue/krescue-vim1.dtb
+test "$fdtfile" = "amlogic/meson-gxm-khadas-vim2.dtb" && setenv Cdtb /rescue/krescue-vim2.dtb
+test "$fdtfile" = "amlogic/meson-g12b-a311d-khadas-vim3.dtb" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
+
+VENDOR_=""
+
+test "$fdtfile" = "rockchip/rk3399-khadas-edge-v.dtb" && setenv Cdtb /rescue/krescue-edge.dtb && VENDOR_=rockchip
+test "$fdtfile" = "rockchip/rk3399-khadas-edge-captain.dtb" && setenv Cdtb /rescue/krescue-edge.dtb && VENDOR_=rockchip
+test "$fdtfile" = "rockchip/rk3399-khadas-edge.dtb" && setenv Cdtb /rescue/krescue-edge.dtb && VENDOR_=rockchip
+
+test "$boot_source" = "" || setenv BOOTED $boot_source
 
 if test "$Cdtb" = "/rescue/krescue-vim.dtb"; then
     echo "[w] dtb not detected force use static: $Cdtb"
@@ -116,17 +137,14 @@ fi
 
 ##############################################################
 
-if test "$hwver" = "VIM3.V12"; then
-echo $LOADER $DTB_ADDR /rescue/kvim3l_linux.dtb
-$LOADER $DTB_ADDR /rescue/kvim3l_linux.dtb
-osd open
-fi
+
+if test "$fdtfile" = "" ; then
 
 echo "load logo"
 echo $LOADER $LOGO_ADDR $Csplash
 $LOADER $LOGO_ADDR $Csplash
 
-if bmp display $LOGO_ADDR 0 0; then 
+if bmp display $LOGO_ADDR m m; then 
     echo "BMP OK"
 else
     echo "BMP KO"
@@ -136,12 +154,27 @@ else
     unzip $LOGO_ADDR $LOGO_ADDR2
 fi
 
+fi
+
+test "$fdt_addr_r"     = "" || setenv DTB_ADDR     $fdt_addr_r
+test "$ramdisk_addr_r" = "" || setenv UINITRD_ADDR $ramdisk_addr_r
+test "$kernel_addr_r"  = "" || setenv UIMAGE_ADDR  $kernel_addr_r
+
+echo "addrs:  UIMAGE_ADDR ::  UINITRD_ADDR ::  DTB_ADDR"
+echo "addrs: $UIMAGE_ADDR :: $UINITRD_ADDR :: $DTB_ADDR"
+echo "setenv kernel_addr_r $kernel_addr_r; setenv ramdisk_addr_r $ramdisk_addr_r; setenv fdt_addr_r $fdt_addr_r;"
+
+echo ":::::::::::::::"
+
 echo "load dtb"
+
 echo $LOADER $DTB_ADDR $Cdtb
 $LOADER $DTB_ADDR $Cdtb
 fdt addr $DTB_ADDR || exit 1
 #
-fdt set spifc status okay
+
+test "$VENDOR_" = "" && fdt set spifc status okay
+test "$VENDOR_" = "" || fdt set spi1 status okay
 
 echo "load packed initrd"
 echo $LOADER $UINITRD_ADDR $CuInitrd
@@ -152,12 +185,22 @@ echo $LOADER $UIMAGE_ADDR $CuImage
 $LOADER $UIMAGE_ADDR $CuImage
 
 setenv bootargs "${cmdline} ${rescue_custom} booted=$BOOTED hwver=$hwver"
-setenv bootargs "${bootargs} console=tty0 console=ttyAML0,115200n8 console=ttyS0,115200n8 no_console_suspend consoleblank=0"
+
+CONSOLE_="console=ttyAML0,115200n8 console=ttyS0,115200n8"
+
+test "$VENDOR_" = "" || CONSOLE_="console=uart8250,mmio32,0xff1a0000"
+
+setenv bootargs "${bootargs} console=tty0 $CONSOLE_ no_console_suspend consoleblank=0"
 setenv bootargs "${bootargs} vout=${outputmode},enable hdmitx=${cecconfig},${colorattribute}"
 setenv bootargs "${bootargs} hdmimode=${hdmimode} cvbsmode=${cvbsmode} osd_reverse=${osd_reverse}"
 setenv bootargs "${bootargs} video_reverse=${video_reverse} jtag=${jtag} reboot_mode=${reboot_mode} ddr_size=${ddr_size}"
 
 setenv bootargs "${bootargs} dtb=$Cdtb"
+
+# autodetect fix green
+osd12=
+test "$fdtfile" = "" || osd12=osd12
+setenv bootargs "${bootargs} $osd12 samba-usb-krescue"
 
 #fdt addr ${dtb_mem_addr};
 #fdt resize 65536

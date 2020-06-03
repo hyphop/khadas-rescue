@@ -22,16 +22,19 @@ case "$@" in
     REBUILD_RESCUE=1
     ;;
     -1)
-    UBOOT_VER=1
+    DEVNAME=VIM1
     ;;
     -2)
-    UBOOT_VER=2
+    DEVNAME=VIM2
     ;;
     -3)
-    UBOOT_VER=3
+    DEVNAME=VIM3
     ;;
     -3l|-l)
-    UBOOT_VER=3l
+    DEVNAME=VIM3L
+    ;;
+    -e)
+    DEVNAME=Edge
     ;;
 esac
 
@@ -81,26 +84,43 @@ SPI_PARTS_DTS="$S/spi_parts.dts"
 SPI_PARTS_CMD="$S/spi_parts.cmdline"
 SPI_PARTS_CMDLINE="mtdparts="
 
-
 # kernel run from there
 
 INITRD_ADDR=0x3000000
  LINUX_ADDR=0x1080000
 
+# rk3399 + vim
+LINUX_ADDR=0x0f080000
+
 KERNEL_CMP_SPI=lzma
+KERNEL_CMP_SPI_OPTS="-9e"
 KERNEL_CMP=gzip
+KERNEL_CMP_OPTS="-9"
 
 BLOCK_SIZE=$((1024*64))
 BLOCK_SIZH=$((1024*32))
 
 SYS_ENV=$S/00_system_env.txt
 
-[ "$UBOOT_VER" ] || UBOOT_VER=3
+[ "$UBOOT_BIN" ] || {
+    [ "$DEVNAME" ] || {
+        echo "[e] DEVNAME not defined">&2
+	exit 1
+    }
+    UBOOT_BIN="/tmp/u-boot-mainline/$DEVNAME.u-boot.spi.bin"
+}
 
-echo "[i] uboot ver $UBOOT_VER">&2
+[ -e "$UBOOT_BIN" ] && {
+    A=$(basename "$UBOOT_BIN")
+    DEVNAME=${A%%.*}
+}
 
-UBOOT_BIN=$S/u-boot.spi.bin
-UBOOT_BIN=$S/uboot.VIM$UBOOT_VER.spi.bin
+[ -e "$UBOOT_BIN" ] || {
+    echo "[e] $UBOOT_BIN = not found">&2
+    exit 1
+}
+
+echo "[i] uboot ver $DEVNAME">&2
 
 #UBOOT_SCRIPT=$S/*.cmd
 UBOOT_SCRIPT=$P/../files/rescue.cmd
@@ -108,7 +128,36 @@ UBOOT_SCRIPT_ENV=$S/*env.txt
 #UBOOT_LOGOS=$S/*.bmp.gz
 UBOOT_LOGOS=$S/splash.bmp
 #UBOOT_DTB=$S/*.dtb
-UBOOT_DTB=$S/krescue-vim$UBOOT_VER.dtb
+
+DTB_DIR=/tmp/modules
+
+
+[ "$UBOOT_DTB" ] || {
+
+#   UBOOT_DTB=$S/krescue-$DEVNAME.dtb
+
+    case "$DEVNAME" in
+    VIM3)
+#    meson-g12b-s922x-khadas-vim3-kresq.dtb
+    DTB_NAME=meson-g12b-a311d-khadas-vim3-kresq.dtb
+    ;;
+    VIM1)
+    DTB_NAME=meson-gxl-s905x-khadas-vim-kresq.dtb
+    ;;
+    VIM2)
+    DTB_NAME=meson-gxm-khadas-vim2-kresq.dtb
+    ;;
+    VIM3L)
+    DTB_NAME=meson-sm1-khadas-vim3l-kresq.dtb
+    ;;
+    Edge)
+    DTB_NAME=rk3399-khadas-edge-v-kresq.dtb
+    ;;
+    esac
+
+    UBOOT_DTB="$DTB_DIR/$DTB_NAME"
+
+}
 
 LINUX_U_IMAGE=$S/uImage
 LINUX_U_IMAGE_SPI=$S/uImage.spi
@@ -321,12 +370,12 @@ CMPDATE(){
 
     CMPDATE $LINUX_IMAGE $CKERNEL && {
 	echo "[i] compress kernel $LINUX_IMAGE">&2
-	CMD $KERNEL_CMP -9 -c $LINUX_IMAGE > $CKERNEL
+	CMD $KERNEL_CMP -c $LINUX_IMAGE > $CKERNEL
     }
 
     CMPDATE $LINUX_IMAGE $CKERNEL_SPI && {
 	echo "[i] compress kernel $LINUX_IMAGE">&2
-	CMD $KERNEL_CMP_SPI -9 -c $LINUX_IMAGE > $CKERNEL_SPI
+	CMD $KERNEL_CMP_SPI $KERNEL_CMP_SPI_OPTS -c $LINUX_IMAGE > $CKERNEL_SPI
     }
 
 #}
@@ -343,7 +392,7 @@ CMD $mkimage -A arm64 -O linux -C $KERNEL_CMP \
 CMPDATE $CKERNEL_SPI $LINUX_U_IMAGE_SPI && {
 CMD $mkimage -A arm64 -O linux -C $KERNEL_CMP_SPI \
 	-T kernel -a $LINUX_ADDR -e $LINUX_ADDR \
-	-n "$KNAME" -d $CKERNEL_SPI $LINUX_U_IMAGE_SPI || {
+	-n "$KNAME_SPI" -d $CKERNEL_SPI $LINUX_U_IMAGE_SPI || {
 	    echo "[e] error mkimage ">&2
 	    exit 1
 	}

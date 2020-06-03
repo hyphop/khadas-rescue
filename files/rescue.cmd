@@ -74,6 +74,12 @@ test "$fdtfile" = "amlogic/meson-gxl-s905x-khadas-vim.dtb" && setenv Cdtb /rescu
 test "$fdtfile" = "amlogic/meson-gxm-khadas-vim2.dtb" && setenv Cdtb /rescue/krescue-vim2.dtb
 test "$fdtfile" = "amlogic/meson-g12b-a311d-khadas-vim3.dtb" && setenv Cdtb /rescue/krescue-vim3-a311d.dtb
 
+VENDOR_=""
+
+test "$fdtfile" = "rockchip/rk3399-khadas-edge-v.dtb" && setenv Cdtb /rescue/krescue-edge.dtb && VENDOR_=rockchip
+test "$fdtfile" = "rockchip/rk3399-khadas-edge-captain.dtb" && setenv Cdtb /rescue/krescue-edge.dtb && VENDOR_=rockchip
+test "$fdtfile" = "rockchip/rk3399-khadas-edge.dtb" && setenv Cdtb /rescue/krescue-edge.dtb && VENDOR_=rockchip
+
 test "$boot_source" = "" || setenv BOOTED $boot_source
 
 if test "$Cdtb" = "/rescue/krescue-vim.dtb"; then
@@ -150,23 +156,39 @@ fi
 
 fi
 
+test "$fdt_addr_r"     = "" || setenv DTB_ADDR     $fdt_addr_r
+test "$ramdisk_addr_r" = "" || setenv UINITRD_ADDR $ramdisk_addr_r
+test "$kernel_addr_r"  = "" || setenv UIMAGE_ADDR  $kernel_addr_r
+
+echo "addrs:  UIMAGE_ADDR ::  UINITRD_ADDR ::  DTB_ADDR"
+echo "addrs: $UIMAGE_ADDR :: $UINITRD_ADDR :: $DTB_ADDR"
+echo "setenv kernel_addr_r $kernel_addr_r; setenv ramdisk_addr_r $ramdisk_addr_r; setenv fdt_addr_r $fdt_addr_r;"
+
+echo ":::::::::::::::"
+
 echo "load dtb"
+
 echo $LOADER $DTB_ADDR $Cdtb
 $LOADER $DTB_ADDR $Cdtb
 fdt addr $DTB_ADDR || exit 1
 #
-fdt set spifc status okay
+
+SPI_=spifc
+test "$VENDOR_" = "" || SPI_=spi1
+fdt set $SPI_ status okay
 
 echo "load packed initrd"
 echo $LOADER $UINITRD_ADDR $CuInitrd
 $LOADER $UINITRD_ADDR $CuInitrd
 
-echo "load packed kernel"
-echo $LOADER $UIMAGE_ADDR $CuImage
-$LOADER $UIMAGE_ADDR $CuImage
 
 setenv bootargs "${cmdline} ${rescue_custom} booted=$BOOTED hwver=$hwver"
-setenv bootargs "${bootargs} console=tty0 console=ttyAML0,115200n8 console=ttyS0,115200n8 no_console_suspend consoleblank=0"
+
+CONSOLE_="console=ttyAML0,115200n8 console=ttyS0,115200n8"
+
+test "$VENDOR_" = "" || CONSOLE_="console=uart8250,mmio32,0xff1a0000"
+
+setenv bootargs "${bootargs} console=tty0 $CONSOLE_ no_console_suspend consoleblank=0"
 setenv bootargs "${bootargs} vout=${outputmode},enable hdmitx=${cecconfig},${colorattribute}"
 setenv bootargs "${bootargs} hdmimode=${hdmimode} cvbsmode=${cvbsmode} osd_reverse=${osd_reverse}"
 setenv bootargs "${bootargs} video_reverse=${video_reverse} jtag=${jtag} reboot_mode=${reboot_mode} ddr_size=${ddr_size}"
@@ -195,7 +217,15 @@ echo "[i] bootcmd:  $bootcmd"
 #echo "[i] sleep 2 sec Ctrl+C for break boot"
 #sleep 2 || exit 1
 
+echo "load packed kernel"
+
+echo "try:: $LOADER $UIMAGE_ADDR $CImage"
+
+$LOADER $UIMAGE_ADDR $CImage && echo "booti $UIMAGE_ADDR $UINITRD_ADDR $DTB_ADDR" && booti $UIMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
+
 echo bootm $UIMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
+echo $LOADER $UIMAGE_ADDR $CuImage
+$LOADER $UIMAGE_ADDR $CuImage
 bootm $UIMAGE_ADDR $UINITRD_ADDR $DTB_ADDR
 
 echo oooopsss

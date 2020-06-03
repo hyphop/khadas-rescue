@@ -26,19 +26,24 @@ case $a in
     REBUILD_RESCUE=1
     ;;
     -1)
-DEVNAME=VIM1
+UBOOT_VER=1
+DEVNAME="VIM$UBOOT_VER"
     ;;
     -2)
-DEVNAME=VIM2
+UBOOT_VER=2
+DEVNAME="VIM$UBOOT_VER"
     ;;
     -3)
-DEVNAME=VIM3
+UBOOT_VER=3
+DEVNAME="VIM$UBOOT_VER"
     ;;
     -3l|-3L)
-DEVNAME=VIM3L
+UBOOT_VER=3l
+DEVNAME="VIM$UBOOT_VER"
     ;;
     -e)
-DEVNAME=Edge
+UBOOT_VER=e
+DEVNAME="Edge"
     ;;
     *@*)
     DEV="$a"
@@ -59,35 +64,45 @@ done
     exit 1
 }
 
-CMD(){
-    echo "[#] $@">&2
-    "$@"
+
+[ "" ] && {
+case "$UBOOT_VER" in
+
+    echo "[i] change uboot version to $UBOOT_VER">&2
+#
+    1|2|3|3l)
+
+    UBOOT_BIN="$TU/VIM$UBOOT_VER.u-boot.spi.bin"
+
+    CMD ln -sf $TU/VIM$UBOOT_VER.u-boot.sd.bin $UBOOT_SD
+    CMD ln -sf $TU/VIM$UBOOT_VER.u-boot.spi.bin $UBOOT_SPI
+    ;;
+
+    e)
+
+    UBOOT_BIN="$TU/Edge.u-boot.spi.bin"
+
+    CMD ln -sf $TU/Edge.u-boot.sd.bin $UBOOT_SD
+    CMD ln -sf $TU/Edge.u-boot.spi.bin $UBOOT_SPI
+    ;;
+
+esac
 }
 
-UBOOT_SD=../share/u-boot.sd.bin
-UBOOT_SPI=../share/u-boot.spi.bin
-TU="/tmp/u-boot-mainline"
-
-    UBOOT_BIN="$TU/$DEVNAME.u-boot.spi.bin"
-
-    CMD ln -sf $TU/$DEVNAME.u-boot.sd.bin $UBOOT_SD
-    CMD ln -sf $TU/$DEVNAME.u-boot.spi.bin $UBOOT_SPI
-
 ## rebuild rescue image
-
 export UBOOT_BIN=$UBOOT_BIN
 export DEVNAME=$DEVNAME
-
-echo "
-export UBOOT_BIN=$UBOOT_BIN
-export DEVNAME=$DEVNAME
-"
+export UBOOT_VER=$UBOOT_VER
 
 [ "$REBUILD_RESCUE" ] && {
     #NOCACHE=1 
     $(dirname $0)/pack_image -r 
 }
 
+CMD(){
+    echo "[#] $@">&2
+    "$@"
+}
 
 D=/tmp/krescue.sd
 D2=/tmp/krescue.sd.tmp
@@ -98,6 +113,13 @@ D2=/tmp/krescue.sd.tmp
 [ -d "$D" ] && rm -rf "$D"
 [ -d "$D" ] || mkdir -p "$D"
 
+UBOOT_SD=../share/u-boot.sd.bin
+UBOOT_SPI=../share/u-boot.spi.bin
+
+#u-boot.sd.bin
+#u-boot.vim1.sd.bin
+
+TU="/tmp/u-boot-mainline"
 
 
 [ -f $UBOOT_SD ] || {
@@ -231,7 +253,7 @@ U="$TU/$v.u-boot.$t"
     break
 }
 
-#done
+done
 done
 done
 }
